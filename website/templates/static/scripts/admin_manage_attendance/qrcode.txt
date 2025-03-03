@@ -1,0 +1,155 @@
+$(document).ready(function(){
+    const html5QrCode = new Html5Qrcode("reader");
+    
+            // Configuration for the QR scanner
+            const config = {
+                fps: 30 , // Frames per second
+                aspectRatio: 1, // Maintain square aspect ratio
+                disableFlip: true, // Disable flipping for front cameras
+                rememberLastUsedCamera: true,
+                qrbox: function(viewfinderWidth, viewfinderHeight) {
+                    // Calculate the size of the QR box dynamically
+                    const minSize = Math.min(viewfinderWidth, viewfinderHeight);
+                    const qrboxSize = Math.floor(minSize * 0.6); // Use 50% of the smaller dimension
+                    return { width: qrboxSize, height: qrboxSize };
+                },
+                
+            };
+            
+    
+            let shouldPauseVideo = true; // Pause the video feed
+            let showPausedBanner = false; // Do not show the paused banner
+            let scanCooldown = false; // Prevent rapid scanning
+
+            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                if (scanCooldown) {
+                    console.log("Scan ignored due to cooldown.");
+                    return;
+                }
+
+                console.log("Decoded QR Code:", decodedText);
+
+                var activity_Id = $("#activityComboBox").val();
+
+                if (!activity_Id) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Please select an activity before scanning.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                if (!decodedText) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Invalid QR Code. Please try again.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                // Pause the scanner to prevent multiple scans
+                html5QrCode.pause(shouldPauseVideo, showPausedBanner);
+                scanCooldown = true;
+
+                $.ajax({
+                    type: 'POST',
+                    url: `/add_attendeesQR/${activity_Id}/${decodedText}`,
+                    success: function(response) {
+                        console.log("Server Response:", response);
+
+                        if (response.success) {
+                            ongoing_attendance_table.ajax.reload(null, false);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                confirmButtonText: 'OK',
+                                timer: 500,
+                                timerProgressBar: true
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Already Attended',
+                                text: response.message,
+                                confirmButtonText: 'OK',
+                                timer: 500,
+                                timerProgressBar: true
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log("AJAX Error:", xhr.responseText);
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred: ' + xhr.responseText,
+                            confirmButtonText: 'OK',
+                            timer: 500,
+                            timerProgressBar: true
+                        });
+                    },
+                    complete: function() {
+                        // Delay before restarting the scanner
+                        setTimeout(() => {
+                            scanCooldown = false;
+                            restartScanner(); // Restart the scanner after delay
+                            console.log("Scanner restarted.");
+                        }, 1000); // 1.5 seconds delay
+                    }
+                });
+            };
+
+            // Function to restart the scanner
+            function restartScanner() {
+                html5QrCode.stop().then(() => {
+                    console.log("Scanner stopped. Restarting...");
+                    html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+                        .catch((err) => console.error("Failed to restart scanner:", err));
+                }).catch((err) => console.error("Error stopping scanner:", err));
+            }
+    
+            /*const onScanFailure = (error) => {
+                console.log(`Code scan error= ${error}`);
+            };*/
+    
+    
+            
+            function startScanner(){
+                 // Show the scanner
+                html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback,/*onScanFailure*/verbose=true)
+                    .catch((err) => {
+                        console.error("Unable to start scanning:", err);
+                        alert("Failed to start QR code scanner. Please check your camera permissions or try again.");
+                    });
+            }
+    
+            // Stop the scanner and hide the reader
+            function stopScanner() {
+                html5QrCode.stop().then(() => {
+                        console.log("Scanner stopped.");
+                    }).catch((err) => {
+                        console.log("Error stopping the scanner:", err);
+                    });
+            }
+    
+            $("#scan-btn").on("click", function () {
+                // Check if the scanner is running
+                if (html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) {
+                    $("#reader").hide();
+                    stopScanner()
+                    $(this).text("Start Scanning");
+                } else {
+                    $("#reader").show();
+                    startScanner()
+                    $(this).text("Stop Scanning");
+                }
+    
+            });
+    
+    })

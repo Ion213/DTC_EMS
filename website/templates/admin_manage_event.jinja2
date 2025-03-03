@@ -1,0 +1,138 @@
+{% extends 'admin_base_top_nav.html' %}
+
+{% block title %}
+    MANAGE EVENT
+{% endblock %}
+
+{% block content %}
+
+<style>
+	.container { max-width: 2560px; max-height: 3660px;} 
+    table { font-family: 'Helvetica', sans-serif;font-size: 12px; } 
+   body {
+        background-color: hsl(134, 36%, 58%);
+    }
+</style>
+
+<div class="container mt-5">
+<h2 class="text-center fw-bold mb-4">🎭 Manage Event</h2>
+	<div class="border p-3 bg-opacity-25 ">
+		<div class="row">
+			<!-- Add Event Form (Smaller) -->
+			<div class="col-lg-2 col-md-2 mb-2 ">
+				<div class="border p-3">
+					<strong class="fs-3 fw-bold fst-italic">
+						<i class="fa-solid fa-calendar-plus">
+						</i>
+						Add Event
+					</strong>
+					<form id="addEventForm" method="POST">
+						<div class="mb-3">
+							<label for="eventT" class="form-label">
+								Event Name
+							</label>
+							<input type="text" class="form-control" id="eventT" name="eventT" required>
+							<label for="event_descriptionT" class="form-label">
+								Event Description
+							</label>
+							<textarea class="form-control" id="event_descriptionT" name="event_descriptionT"
+							rows="4">
+							</textarea>
+							<br>
+							<button type="submit" class="btn btn-primary">
+								<i class="fa-solid fa-plus">
+								</i>
+								Add Event
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<!-- Events Table (Larger) -->
+			<div class="col-lg-10 col-md-10 mb-10">
+				<div class="border p-3">
+					<strong class="fs-3 fw-bold fst-italic">
+						Events:
+					</strong>
+					<div class="table-responsive">
+						<table class="table table-bordered table-striped table-light" id="event_table"
+						class="display" style="width:100%">
+							<thead>
+								<tr>
+									<th>
+										Event Name
+									</th>
+									<th>
+										Event Description
+									</th>
+									<th>
+										Activities| Fines
+									</th>
+									<th>
+										Date Created
+									</th>
+									<th>
+										Date Updated
+									</th>
+									<th>
+										Action
+									</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			</div>
+			<br>
+		</div>
+	</div>
+</div>
+<!-- EVENT UPDATE MODAL -->
+<div class="modal fade" id="updateEventModal" tabindex="-1" aria-labelledby="updateEventModalLabel">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="updateEventModalLabel">
+					Update Event
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+				</button>
+			</div>
+			<div class="modal-body">
+				<form id="updateEventForm">
+					<input type="hidden" id="selected_event_id" name="selected_event_id">
+					<div class="mb-3">
+						<label for="update_event" class="form-label">
+							Event Name
+						</label>
+						<input type="text" class="form-control" id="update_event" name="update_event"
+						required>
+					</div>
+					<div class="mb-3">
+						<label for="update_event_description" class="form-label">
+							Event Description
+						</label>
+						<textarea class="form-control" id="update_event_description" name="update_event_description"
+						rows="4">
+						</textarea>
+					</div>
+					<button type="submit" class="btn btn-primary">
+						Save Changes
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script src="{{ url_for('static', filename='scripts/admin_manage_event/event_table.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_event/event_add.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_event/event_delete.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_event/event_update.js') }}">
+</script>
+
+{% endblock %}

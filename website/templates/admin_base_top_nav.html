@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>          
+    {% block title %}
+    {% endblock %}
+  </title>
+
+  <script src="{{ url_for('static', filename='htmx2.0.4/htmx.min.js') }}"></script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap5.3/css/bootstrap.min.css') }}">
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-free-6.5.2-web/css/all.min.css') }}">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='sweet-alert/css/sweetalert2.min.css') }}">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='data-tables/css/dataTables.dataTables.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='data-tables/css/buttons.dataTables.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='data-tables/css/select.dataTables.min.css') }}">
+  
+  <script src="{{ url_for('static', filename='bootstrap5.3/js/bootstrap.bundle.min.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='jquery3.7.1/jquery-3.7.1.min.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='sweet-alert/js/sweetalert2@11.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='data-tables/js/dataTables.js') }}"></script>
+  <script src="{{ url_for('static', filename='data-tables/js/dataTables.buttons.js') }}"></script>
+  <script src="{{ url_for('static', filename='data-tables/js/buttons.dataTables.js') }}"></script>
+  <script src="{{ url_for('static', filename='data-tables/js/buttons.colVis.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='data-tables/js/dataTables.select.js') }}"></script>
+  <script src="{{ url_for('static', filename='data-tables/js/select.dataTables.js') }}"></script>
+  
+  <script src="{{ url_for('static', filename='data-tables/js/buttons.html5.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='data-tables/js/jszip.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='data-tables/js/pdfmake.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='data-tables/js/vfs_fonts.js') }}"></script>
+  <script src="{{ url_for('static', filename='data-tables/js/buttons.print.min.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='html5-qrcode-scanner/html5-qrcode.min.js') }}">
+  </script>
+</head>
+<body>
+<div id="content">
+
+  <nav class="navbar navbar-expand-lg navbar-light border-dark text-white py-2" style="background-color:#b7c6bf">
+    <div class="container-fluid ">
+      <a class="navbar-brand" href="#">
+                <img src="{{ url_for('static', filename='logo/dtc.png') }}" alt="Logo" width="50" height="50">
+                DTC EMS
+      </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+            {% if current_user.role == 'admin' or current_user.role == 'ssg'%}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-calendar-days"></i> EVENTS</a>
+                    
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_event.manage_event_render_template') }}"><i class="fa-solid fa-calendar-plus"></i> MANAGE EVENT</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_schedule.manage_schedule_render_template') }}"><i class="fa-solid fa-calendar-check"></i> MANAGE EVENT SCHEDULE</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_attendance.manage_attendance_render_template') }}"><i class="fa-solid fa-clipboard-user"></i> MANAGE EVENT ATTENDANCES</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_payments.payments_page') }}"><i class="fa-solid fa-money-check-dollar"></i> MANAGE EVENT Payments(coming soon)</a></li>
+                </ul>
+            </li>
+            {%endif%}
+            {% if current_user.role == 'admin' %}
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-users-gear"></i> USER ACCOUNTS</a>
+                  
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_ssg_account.manage_ssg_account_render_template') }}"><i class="fa-solid fa-user-tie"></i> MANAGE SSG ACCOUNT</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_student_account.manage_student_account_render_template') }}"><i class="fa-solid fa-user"></i> MANAGE STUDENT ACCOUNT</a></li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                    data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-building"></i> DEPARTMENTS</a>
+                  
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_department.manage_department_render_template') }}"><i class="fa-solid fa-building-user"></i> MANAGE DEPARTMENTS</a></li>
+                </ul>
+            </li>
+            {%endif%}
+
+            <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> {{ current_user.email }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                          <li class="nav-item">
+                            <a class="nav-link" href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> LOG_OUT</a>
+                          </li>
+                        </ul>
+                    </li>
+
+              
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+    {% block content %}
+    {% endblock %}
+
+</div>
+
+  <script>
+    $(document).ready(function() {
+      $('#logout-btn').on('click', function(e) {
+        e.preventDefault(); // Prevent default link behavior
+        // Use SweetAlert for logout confirmation
+        Swal.fire({
+          title: 'Are you sure?',
+          text: 'Do you want to logout?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, logout!',
+          cancelButtonText: 'Cancel'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Send an AJAX request to logout
+            $.ajax({
+              url: "{{ url_for('user_auth.user_logout') }}", // Your Flask logout route
+              method: 'POST', // Assuming logout uses a POST request
+              dataType: 'json', // Expect JSON response
+              success: function(response) {
+                if (response.success) {
+                  // SweetAlert for successful logout
+                  Swal.fire({
+                    title: 'Logged Out',
+                    text: 'You have successfully logged out.',
+                    icon: 'success',
+                    confirmButtonText: 'Okay',
+                    timer: 1000,
+                    timerProgressBar: true
+                  }).then(() => {
+                    window.location.href = response.redirect_url; // Redirect to the appropriate page
+                  });
+                } 
+                else {
+                  // SweetAlert for failure
+                  Swal.fire({
+                    title: 'Logout Failed',
+                    text: 'There was an issue logging out. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'Okay',
+                    timer: 1000,
+                    timerProgressBar: true
+                  });
+                }
+              },
+              error: function() {
+                // SweetAlert for error
+                Swal.fire({
+                  title: 'Error',
+                  text: 'An error occurred. Please try again.',
+                  icon: 'error',
+                  confirmButtonText: 'Okay',
+                  timer: 10000,
+                  timerProgressBar: true
+                });
+              }
+            });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

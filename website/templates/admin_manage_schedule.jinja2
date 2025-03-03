@@ -1,0 +1,300 @@
+{% extends 'admin_base_top_nav.html' %}
+
+{% block title %}
+    MANAGE SCHEDULE
+{% endblock %}
+
+{% block content %}
+
+<style>
+  .container { max-width: 2560px; max-height: 2260px;} 
+  .table-responsive { overflow-x: auto; overflow-y:auto; } 
+  body {
+        background-color: hsl(134, 36%, 58%);
+    }
+</style>
+
+<div class="container mt-5">
+<h2 class="text-center fw-bold mb-4">📅 Manage Schedule</h2>
+	<div class="border p-3 bg-opacity-25 ">
+		<div class="row">
+			<div class="col-lg-2 col-md-2 mb-2 ">
+				<div class="border p-3">
+					<h1 class="fs-3 fw-bold fst-italic">
+						<i class="fa-solid fa-calendar-check">
+						</i>
+						Add Schedule:
+					</h1>
+					<form id="add_schedule_form">
+						<div class="mb-3">
+							<select class="form-select" id="eventT" name="eventT" required>
+								<option value="">
+									Select an event...
+								</option>
+								{% for event in events %}
+								<option value="{{ event.id  }}">
+									{{ event.event }}
+								</option>
+								{% endfor %}
+							</select>
+						</div>
+						<div class="mb-3">
+							<label for="schedule_dateT">
+								Schedule Date:
+							</label>
+							<input type="date" id="schedule_dateT" name="schedule_dateT" required>
+						</div>
+						<button type="submit" class="btn btn-primary">
+							<i class="fa-solid fa-plus">
+							</i>
+							Add Schedule
+						</button>
+					</form>
+				</div>
+			</div>
+			<!-- Tabs-->
+			<div class="col-lg-10 col-md-10 mb-10">
+				<ul class="nav nav-tabs" id="eventTabs" role="tablist">
+					<li class="nav-item" role="presentation">
+						<button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab"
+						data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming"
+						aria-selected="true">
+							Upcoming Events 🕒
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="ongoing-tab" data-bs-toggle="tab" data-bs-target="#ongoing"
+						type="button" role="tab" aria-controls="ongoing" aria-selected="false">
+							Ongoing Events ⏳
+						</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed"
+						type="button" role="tab" aria-controls="completed" aria-selected="false">
+							Completed Events ✔️
+						</button>
+					</li>
+				</ul>
+				<div class="tab-content" id="eventTabsContent">
+					<div class="tab-pane fade show active" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+						<!-- Upcoming Schedule Table -->
+						<div class="border p-3">
+							<h1 class="fs-3 fw-bold fst-italic">
+								Upcoming Events:
+							</h1>
+							<div class="table-responsive">
+								<table class="table table-bordered table-striped" id="upcoming_sched_table"
+								class="display" style="width:100%">
+									<thead>
+										<tr>
+											<th>
+												Event Name
+											</th>
+											<th>
+												Schedule Date
+											</th>
+											<th>
+												Activities
+											</th>
+											<th>
+												Total Fines
+											</th>
+											<th>
+												Status
+											</th>
+											<th>
+												Action
+											</th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="tab-pane fade" id="ongoing" role="tabpanel" aria-labelledby="ongoing-tab">
+						<!-- Ongoing Schedule Table-->
+						<div class="border p-3">
+							<h1 class="fs-3 fw-bold fst-italic">
+								Ongoing Events:
+							</h1>
+							<div class="table-responsive">
+								<table class="table table-bordered table-striped" id="ongoing_sched_table"
+								class="display" style="width:100%">
+									<thead>
+										<tr>
+											<th>
+												Event Name
+											</th>
+											<th>
+												Schedule Date
+											</th>
+										
+											<th>
+												Activities
+											</th>
+											<th>
+												Total Fines
+											</th>
+											<th>
+												Status
+											</th>
+											<th>
+												Action
+											</th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+						<!-- completed Schedule Table-->
+						<div class="border p-3">
+							<h1 class="fs-3 fw-bold fst-italic">
+								Completed Events:
+							</h1>
+							<div class="table-responsive">
+								<table class="table table-bordered table-striped" id="completed_sched_table"
+								class="display" style="width:100%">
+									<thead>
+										<tr>
+											<th>
+												Event Name
+											</th>
+											<th>
+												Schedule Date
+											</th>
+											
+											<th>
+												Activities
+											</th>
+											<th>
+												Total Fines
+											</th>
+											<th>
+												Status
+											</th>
+											<th>
+												Action
+											</th>
+										</tr>
+									</thead>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- update schedule Modal -->
+<div class="modal fade" id="update_schedule_modal" tabindex="-1" aria-labelledby="update_schedule_modal_label">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="update_schedule_modal_label">
+					Update Schedule
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+				</button>
+			</div>
+			<div class="modal-body">
+				<h5 class="modal-title" id="update_event_nameT">event name</h5>
+				<form id="update_schedule_form">
+					<input type="hidden" id="update_selected_schedule_idT" name="update_selected_schedule_idT">
+					<h1 id="update_schedule_nameT" style="text-align: center;">
+					</h1>
+					<div class="mb-3">
+						<label for="update_schedule_dateT" class="form-label">
+							Schedule Date
+						</label>
+						<input type="date" class="form-control" placeholder="MM-DD-YYYY" id="update_schedule_dateT"
+						name="update_schedule_dateT" required>
+					</div>
+					<button type="submit" class="btn btn-primary">
+						Save Changes
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- show activities -->
+<div class="modal fade" id="show_activities_modal" tabindex="-1" aria-labelledby="show_activities_modal_label">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="show_activities_modal_label">
+					Activities
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+				</button>
+			</div>
+			<div class="modal-body">
+			<h5 class="modal-title" id="event_name_act">event name</h5>
+				<div class="table-responsive">
+					<table class="table table-bordered table-striped" id="activity_table"
+					class="display" style="width:100%">
+						<thead>
+							<tr>
+								<th>
+									Activity Name
+								</th>
+								<th>
+									Start Time
+								</th>
+								<th>
+									End Time
+								</th>
+								<th>
+									Fines
+								</th>
+							</tr>
+						</thead>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/admin_manage_schedule/upcoming_schedule_table.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_schedule/ongoing_schedule_table.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_schedule/completed_schedule_table.js') }}">
+</script>
+
+<script src="{{ url_for('static', filename='scripts/admin_manage_schedule/schedule_add.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_schedule/schedule_delete.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_schedule/schedule_update.js') }}">
+</script>
+
+<script src="{{ url_for('static', filename='scripts/admin_manage_schedule/schedule_view_activities.js') }}">
+</script>
+<script>    
+$(document).ready(function () {
+        // Check if there's an active tab stored in localStorage
+        var activeTab = localStorage.getItem('activeTab');
+
+        if (activeTab) {
+            // Activate the stored tab using Bootstrap's tab API
+            var targetTab = $('#eventTabs button[data-bs-target="' + activeTab + '"]');
+            targetTab.tab('show');
+        } else {
+            // If no tab is stored, activate the first tab by default
+            $('#eventTabs button:first').tab('show');
+        }
+
+        // Listen for tab clicks and store the active tab in localStorage
+        $('#eventTabs button').on('shown.bs.tab', function (e) {
+            var tabId = $(e.target).attr('data-bs-target');
+            localStorage.setItem('activeTab', tabId);
+        });
+    });
+</script>
+{% endblock %}

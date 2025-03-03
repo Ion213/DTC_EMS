@@ -1,0 +1,26 @@
+python -m venv lib
+lib\Scripts\activate
+
+sudo apt install python3-venv
+python3 -m venv myenv
+source myenv/bin/activate
+
+pip install -r requirements.txt
+
+
+pip install flask
+pip install Flask-SQLAlchemy
+pip install flask-login
+
+pip install pyrebase4
+pip install pytz
+
+pip install Flask-Limiter
+
+
+pip install Flask-Migrate
+flask db init
+flask db migrate -m "Your migration message"
+flask db upgrade
+
+flask db downgrade

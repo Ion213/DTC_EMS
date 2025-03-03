@@ -1,0 +1,251 @@
+{% extends 'admin_base_top_nav.html' %}
+
+{% block title %}
+    MANAGE ATTENDANCE
+{% endblock %}
+
+{% block content %}
+<style>
+    .container { max-width: 2560px; max-height: 3660px;} 
+    table { font-family: 'Helvetica', sans-serif;font-size: 12px; } 
+    body {
+        background-color: hsl(134, 36%, 58%);
+    }
+    .camera-select-container {
+        display: flex;
+        align-items: center;
+        max-width: 200px; /* Adjust as needed */
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    #camera-select {
+        width: 100%;
+        max-width: 100%;
+        text-overflow: ellipsis;
+    }
+.view-attendance {
+    transition: all 0.3s ease-in-out;
+}
+
+.view-attendance.active {
+    transform: scale(0.95);
+    background-color: #007bff !important; /* Keep button blue */
+    color: white !important;
+}
+
+</style>
+
+<div class="container mt-5">
+ <h2 class="text-center fw-bold mb-4">📋 Manage Attendance</h2>
+    <div class="border p-3 bg-opacity-25">
+        <ul class="nav nav-tabs" id="eventTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="ongoing-tab" data-bs-toggle="tab" data-bs-target="#ongoing"
+                type="button" role="tab" aria-controls="ongoing" aria-selected="true">
+                    Ongoing Event ⏳
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed"
+                type="button" role="tab" aria-controls="completed" aria-selected="false">
+                    Completed Events ✔️
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Ongoing Events Tab -->
+            <div class="tab-pane fade show active" id="ongoing" role="tabpanel" aria-labelledby="ongoing-tab">
+                <div class="row">
+                    <div class="col-sm-12 col-md-3 col-lg-2 col-xl-2">
+                        <div class="border p-3">
+                            <h7 id="current_event"></h7>
+                            <br>
+                            <strong class="fs-3 fw-bold fst-italic mb-3">
+                                <i class="fa-solid fa-marker"></i> Add Attendees
+                            </strong>
+                            <br>
+                            <form>
+                                <div class="mb-3">
+                                    <label for="user-search" class="form-label">
+                                        Input Student Name
+                                    </label>
+                                    <input type="text" id="user-search" class="form-control" name="user-search"
+                                    placeholder="Input Student Name">
+                                    <ul id="user-list" class="list-group mt-2"></ul>
+                                </div>
+                            </form>
+                            <hr>
+                            <strong style="display: block; text-align: center;">or</strong>
+                            <hr>
+                            <strong class="fs-3 fw-bold fst-italic mb-3">
+                                <i class="fa-solid fa-qrcode"></i> Use QR Code
+                            </strong>
+                            <br>
+                                <div class="mb-3">
+                                    <button id="scan-btn-in" class="btn btn-success w-100" style="display: inline;">
+                                        <i class="fa-solid fa-camera"></i> IN
+                                    </button>
+                                    <br>
+                                    <button id="scan-btn-out" class="btn btn-warning w-100" style="display: inline;">
+                                        <i class="fa-solid fa-camera"></i> OUT
+                                    </button>
+                                </div>
+                                <div class="camera-select-container">
+                                    <select id="camera-select"></select>
+                                </div>
+                                <div style="margin: auto; display: block;" id="reader"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 col-md-9 col-lg-10 col-xl-10">
+                        <div class="border p-3">
+                            <div class="mb-3 d-flex align-items-center gap-3">
+                                <h5>Event Name:</h5>
+                                <p class="fs-3 fw-bold fst-italic">
+                                    {% if ongoing_event %}
+                                        {{ ongoing_event.event_name }}
+                                    {% else %}
+                                        No Ongoing Event Yet
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="mb-3 d-flex align-items-center gap-3">
+                                <label for="activityComboBox"> Select Activity:</label>
+                                <select id="activityComboBox" name="activityComboBox" class="form-select w-auto" required>
+                                    {% if ongoing_event %}
+                                        {% for activity in ongoing_activities %}
+                                            <option value="{{ activity.id }}">{{ activity.activity_name }} 🕐{{activity.start_time.strftime('%I:%M %p')}}-{{activity.end_time.strftime('%I:%M %p')}}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            {% if ongoing_event %}
+                                <p>📌 {{ ongoing_event.scheduled_date.strftime('%Y-%B-%d-%A') }}</p>
+                            {% endif %}
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-light" id="ongoing_attendance_table"
+                                class="display" style="width:100%" data-attendance-name="{{ ongoing_event.event_name }}">
+                                    <thead>
+                                        <tr>
+                                            <th>ACTIVITY NAME</th>
+                                            <th>ATTENDEES NAME</th>
+                                            <th>DEPARTMENTS</th>
+                                            <th>TIME IN</th>
+                                            <th>TIME OUT</th>
+                                            <th>ACTION</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Events Tab -->
+        <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+            <div class="row">
+                <!-- Completed Events List -->
+                <div class="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                    <div class="border p-3">
+                        <h3>Completed Events</h3>
+                        <div style="max-height: 400px; overflow-y: auto;"> <!-- Scrollable Box -->
+                            <ul id="completed-events-list" class="list-group">
+                                <li class="list-group-item">Fetching events...</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Table -->
+                <div class="col-sm-12 col-md-8 col-lg-8 col-xl-8">
+                    <div class="border p-3">
+                    <p>Event Name| Activity Name:</p>
+                    <h4 id="attendance_name">SELECT EVENT ACTIVITY FIRST</h4>
+                        
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-light" 
+                                    id="completed_event_activity_attendance_table" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Activity Name</th>
+                                            <th>Student Name</th>
+                                            <th>Department</th>
+                                            <th>Time In</th>
+                                            <th>Time Out</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Update fees Modal -->
+<div class="modal fade" id="add_attendees_completed_activity" tabindex="-1" aria-labelledby="add_attendees_completed_activity_modal_label" >
+    <div class="modal-dialog" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="add_attendees_completed_activity_modal_label">Add Attendance</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            <h5 id="activity_title" > activity_name</h5>
+                <div class="mb-3">
+                    <form id="c_add_form">
+                    <label for="c_user-search" class="form-label">
+                        Input Student Name
+                    </label>
+                    <input type="text" id="c_user-search" class="form-control" name="c_user-search"
+                                    placeholder="Input Student Name">
+                    <ul id="c_user-list" class="list-group mt-2"></ul>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- External Scripts -->
+<script src="{{ url_for('static', filename='scripts/admin_manage_attendance/filter_student.js') }}"></script>
+
+<script src="{{ url_for('static', filename='scripts/admin_manage_attendance/ongoing_attendance_table.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_attendance/ongoing_add_attendance.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_attendance/ongoing_addQR_attendance.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_attendance/ongoing_delete_attendance.js') }}"></script>
+
+<script src="{{ url_for('static', filename='scripts/admin_manage_attendance/completed_list_table.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_attendance/completed_add.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_attendance/completed_delete.js') }}"></script>
+
+<!-- Tab Persistence Script -->
+<script>
+$(document).ready(function () {
+    var activeTab = localStorage.getItem('activeTab');
+
+    if (activeTab) {
+        $('#eventTabs button[data-bs-target="' + activeTab + '"]').tab('show');
+        $(activeTab).addClass('show active');
+    } else {
+        $('#eventTabs button:first').tab('show');
+        $('#ongoing').addClass('show active');
+    }
+
+    $('#eventTabs button').on('shown.bs.tab', function (e) {
+        var tabId = $(e.target).attr('data-bs-target');
+        localStorage.setItem('activeTab', tabId);
+    });
+});
+
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,967 @@
+{% extends 'admin_base_top_nav.html' %}
+
+{% block title %}
+    MANAGE PAYMENTS
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .container { max-width: 2560px; max-height: 3660px; } 
+    table { font-family: 'Helvetica', sans-serif; font-size: 12px; } 
+    body { background-color: hsl(134, 36%, 58%); }
+</style>
+
+<div class="container-fluid">
+    <h2 class="text-center fw-bold mb-4">🎭 Manage Payments</h2>
+
+    <!-- Tabs for Navigation -->
+    <ul class="nav nav-tabs" id="paymentTabs">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#add-payment">Add Payment</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#paid-students">Paid Students per Event</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#unpaid-students">Unpaid Students per Event</a>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content mt-3">
+        <!-- Add Payment Tab -->
+        <div class="tab-pane fade show active" id="add-payment">
+            <div class="mb-3">
+                <h2 class="text-center fw-bold mb-4" id="student_name">Input Student Name</h2>
+                <input type="text" id="user-search" class="form-control" placeholder="Input Student Name">
+                <ul id="user-list" class="list-group mt-2"></ul>
+            </div>
+            <hr class="divider">
+
+                <!-- Current Balance -->
+                <div class="col-sm-12 col-md-12 mb-4 col-lg-12" >
+                    <div class="card border-warning h-100">
+                        <div class="card-header bg-warning text-white">Current Balance</div>
+                        <div class="card-body text-center">
+                            <h3 class="text-warning">₱ <span id="current-balance">0.00</span></h3>
+                        </div>
+                    </div>
+                </div>
+               
+            <!-- Balance and Add Payment Form Side by Side -->
+            <div class="row">
+
+                <!-- Add Payment Form -->
+                <div class="col-sm-12 col-md-12 mb-4 col-lg-12" >
+                    <div class="card border-secondary">
+                        <div class="card-header bg-secondary text-white">Add Payment</div>
+                        <div class="card-body">
+                            <form id="add_payment">
+                                <div class="mb-3">
+                                    <label class="form-label">Selected Student</label>
+                                    <input type="text" id="selected_student" class="form-control" readonly>
+                                    <input type="hidden" id="selected_student_ID">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="events" class="form-label">Select events to pay</label>
+                                    <button type="button" class="add-payment-btn btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#eventsModal">
+                                        Select Events
+                                    </button>
+                                    <div class="mt-2 border p-2" style="max-height: 150px; overflow-y: auto;">
+                                        <div id="selectedEvents"></div>
+                                    </div>
+                                    <p id="totalFine" class="mt-2 text-danger">Total Fine: ₱0.00</p>
+                                    <input type="number" id="amount_pay" class="form-control mt-2" placeholder="Enter amount" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Submit Payment</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction History and Unpaid Fines Side by Side -->
+            <div class="row">
+                <!-- Payments History -->
+                <div class="col-md-8 mb-4">
+                    <div class="card border-primary h-100">
+                        <div class="card-header bg-primary text-white">Transaction History</div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" id="paid_events_fines">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Transaction Code</th>
+                                            <th>Total Paid Fines</th>
+                                            <th>Payment Cash Amount</th>
+                                            <th>Payment Change</th>
+                                            <th>Balance</th>
+                                            <th>Transaction Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Unpaid Fines -->
+                <div class="col-md-4 mb-4">
+                    <div class="card border-danger h-100">
+                        <div class="card-header bg-danger text-white">Unpaid Event Fines</div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="unpaid_fines_table" class="table table-bordered table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Event Name</th>
+                                            <th>Activities | Total Fines</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paid Students Tab -->
+        <div class="tab-pane fade" id="paid-students">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">Paid Students per Event</div>
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Event</th>
+                                <th>Amount Paid</th>
+                                <th>Date Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paid-students-list">
+                            <tr><td colspan="4" class="text-center text-muted">No records found.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unpaid Students Tab -->
+        <div class="tab-pane fade" id="unpaid-students">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">Unpaid Students per Event</div>
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Event</th>
+                                <th>Amount Due</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unpaid-students-list">
+                            <tr><td colspan="4" class="text-center text-muted">No records found.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for selecting events -->
+<div class="modal fade" id="eventsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Select Events</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="saveEvents" class="btn btn-success">Save Selected Events</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Show Activities Modal -->
+<div class="modal fade" id="show_unpaid_activities_modal" tabindex="-1" aria-labelledby="show_unpaid_activities_modal_label">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="show_unpaid_activities_modal_label">Unpaid Activities</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5 class="modal-title" id="event_name">Event Name</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="unpaid_activities_table">
+                        <thead>
+                            <tr>
+                                <th>Activity Name</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Fines</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Transaction details -->
+<div class="modal fade" id="transactionDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Paid Events</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Transaction Code: <span id="modalTransactionCode"></span></h6>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Event Date Ended</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionDetailsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    let selected_student_ID;
+    var unpaid_fines_table;
+    var unpaid_activities_table;
+    var paid_events_fines;
+    //search student and get it
+    const user_list = $('#user-list');
+
+    $(document).ready(function () {
+        function toggleButton() {
+            let isEmpty = $('#selected_student_ID').val().trim() === '';
+    
+            $('.add-payment-btn')
+                .prop('disabled', isEmpty)
+                .html(isEmpty ? '🚫' : '▼');
+        }
+    
+        // Run the function on page load
+        toggleButton();
+    
+        // Observe changes to the hidden input's value
+        const observer = new MutationObserver(toggleButton);
+        observer.observe($('#selected_student_ID')[0], { attributes: true, attributeFilter: ['value'] });
+    });
+
+
+    $(document).ready(function () {
+        
+        
+        // Search for students as the user types
+        $('#user-search').on('input', function () {
+            const input = $(this).val().trim();
+           
+            if (input === '') {
+                user_list.empty().append('<li class="list-group-item text-muted">Please enter a student name.</li>');
+                return;
+            }
+    
+            // Fetch students from the server
+            $.ajax({
+                url: '/get_student',
+                type: 'GET',
+                data: { input: input },
+                success: function (response) {
+                    user_list.empty();
+    
+                    if (response.user && response.user.length) {
+                        // Append each student to the list
+                        response.user.forEach(user => {
+                            user_list.append(`
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <button class="select-btn btn btn-light btn-sm" 
+                                        data-id="${user.id}"
+                                        data-name="${user.first_name} ${user.last_name} ${user.department}" 
+                                        data-names="${user.first_name} ${user.last_name}"
+                                        style="display:inline-block; margin-right: 10px; padding: 5px 10px;">
+                                        <i class="fa-solid fa-square-plus"></i> ${user.first_name} ${user.last_name} (${user.department})
+                                    </button>
+                                </li>
+                            `);
+                        });
+                    } else {
+                        user_list.append('<li class="list-group-item text-muted">No users found.</li>');
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to fetch users. Please check your connection and try again.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+        });
+    
+
+
+
+
+
+    
+    //put the selected id into the input and query the data then put in the table
+
+
+    
+
+        // Handle student selection
+        $('#user-list').on('click', '.select-btn', function () {
+            selected_student_ID = $(this).data('id');
+            let name_and_course = $(this).data('name');
+            let names = $(this).data('names')
+    
+            // Update the selected student fields
+            $('#selected_student_ID').val(selected_student_ID);
+            $('#selected_student').val(name_and_course);
+            $('#student_name').text(name_and_course);
+            $('#user-search').val(name_and_course);
+            $('#user-list').empty(); // Clear the user list
+    
+            // Fetch the student's balance
+            fetchStudentBalance(selected_student_ID);
+    
+            // Initialize or reinitialize the DataTable
+            initializeDataTable(selected_student_ID,names);
+
+            initialize_paid_DataTable(selected_student_ID,names)
+
+            // Fetch payment data for the selected student
+        fetchPaymentData(selected_student_ID);
+        });
+    
+        // Fetch student balance
+        function fetchStudentBalance(selected_student_ID) {
+            console.log(selected_student_ID)
+            $.ajax({
+                url: `/get_student_balance/${selected_student_ID}`,
+                type: 'GET',
+                success: function (response) {
+                    let balance = response.balance || 0; // Ensure balance is never undefined
+                    $('#current-balance').text(balance.toFixed(2));
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to fetch student balance.',
+                        confirmButtonText: 'OK',
+                    });
+                },
+            });
+        }
+    
+        // Initialize or reinitialize the DataTable
+        function initializeDataTable(selected_student_ID,names) {
+            if ($.fn.DataTable.isDataTable('#unpaid_fines_table')) {
+                unpaid_fines_table.destroy(); // Destroy existing DataTable if it exists
+            }
+    
+            unpaid_fines_table = $('#unpaid_fines_table').DataTable({
+               //table tools
+                responsive:true,
+                stateSave: true,
+                paging: true,
+                scrollCollapse: true,
+                scrollX: true,
+                scrollY: '50vh',
+                select: true,
+
+                layout: {
+                    top1Start: 'pageLength',
+                    top1End: 'search',
+                    topStart: 'info',
+                    topEnd: 'paging',
+
+                    top3Start: {
+                        buttons: [{
+                            extend: 'collection',
+                            text: 'Export',
+                            buttons: [
+                                {extend: 'copy',
+                                    title: names + " Fines",
+                                    footer: false,
+                                    exportOptions: {columns: ':visible',rows: ':visible'},
+                                    },
+                                    
+                                {extend: 'print',
+                                    title: names + " Fines",
+                                    footer: false,
+                                    autoPrint: false,
+                                    exportOptions: {columns: ':visible',rows: ':visible'}
+                                    }, 
+
+                                {extend: 'excel',
+                                    title: names + " Fines",
+                                    footer: false,
+                                    exportOptions: {columns: ':visible',rows: ':visible'},
+                                    },   
+
+                                {extend: 'csv',
+                                    title: names + " Fines",
+                                    footer: false,
+                                    exportOptions: {columns: ':visible',rows: ':visible'},
+                                    },
+
+                                {extend: 'pdf',
+                                    title: names + " Fines",
+                                    footer: false,
+                                    orientation: 'protrait',
+                                    pageSize: 'LEGAL',
+                                    exportOptions: {columns: ':visible',rows: ':visible'},
+                                    },      
+                        ]},
+
+                            {
+                            extend: 'collection',
+                            text: 'Export All Page',
+                            buttons: [
+                                {extend: 'copy',
+                                    title: names + " Fines",
+                                    footer: false,
+                                    exportOptions: {
+                                        columns: ':visible',
+                                        modifier: {
+                                            page: 'all',
+                                            search: 'none'   
+                                            },
+                                        },
+                                },
+                                    
+                                {extend: 'print',
+                                    title: names + " Fines",
+                                    footer: false,
+                                    autoPrint: false,
+                                    exportOptions: {
+                                        columns: ':visible',
+                                        modifier: {
+                                            page: 'all',
+                                            search: 'none'   
+                                            },
+                                        },
+                                    }, 
+
+                                {extend: 'excel',
+                                    title: names + " Fines",
+                                    footer: false,
+                                    exportOptions: {
+                                        columns: ':visible',
+                                        modifier: {
+                                            page: 'all',
+                                            search: 'none'   
+                                            },
+                                        },
+                                    },   
+
+                                {extend: 'csv',
+                                    title: names + " Fines",
+                                    footer: false,
+                                    exportOptions: {
+                                        columns: ':visible',
+                                        modifier: {
+                                            page: 'all',
+                                            search: 'none'   
+                                            },
+                                        },
+                                    },
+
+                                {extend: 'pdf',
+                                    title: names + " Fines",
+                                    footer: false,
+                                    orientation: 'protrait',
+                                    pageSize: 'LEGAL',
+                                    exportOptions: {
+                                        columns: ':visible',
+                                        modifier: {
+                                            page: 'all',
+                                            search: 'none'   
+                                            },
+                                        },
+                                    },
+
+                            ]},
+                            'colvis'  // Column visibility button
+                        ]
+                    }
+                }, 
+                columnDefs: [
+                    {
+                        targets: -1,  // Hide the last column (Action buttons)
+                        visible: false
+                    }
+                ],
+                ajax: `/get_unpaid_event_fines/${selected_student_ID}`, // Use selected_student_ID
+                columns: [
+                    { data: 'event_name' },
+                    {
+                        data: 'id',
+                        render: function (data, type, row) {
+                            return `
+                                <button class="activities-view-btn btn btn-warning btn-sm" 
+                                    data-id="${data}" 
+                                    data-event_name="${row.event_name}"
+                                    style="display:inline;">
+                                     <i class="fa-solid fa-eye"></i>${row.activity_counts} | &#8369; ${row.total_fines}
+                                </button>
+                            `;
+                        },
+                    },
+                    { data: 'scheduled_date' },
+                ],
+            });
+        }
+    
+        // View unpaid activities
+        $('#unpaid_fines_table').on('click', '.activities-view-btn', function () {
+            var event_id = $(this).data('id');
+            var event_name = $(this).data('event_name');
+            $('#event_name').text(event_name);
+    
+            // Show the modal
+            $('#show_unpaid_activities_modal').modal('show');
+    
+            // Load activities for this event using AJAX
+            loadActivities(event_id);
+        });
+    
+        // Function to load activities in the modal
+        function loadActivities(event_id) {
+            if ($.fn.DataTable.isDataTable('#unpaid_activities_table')) {
+                unpaid_activities_table.destroy(); // Destroy existing DataTable if it exists
+            }
+            unpaid_activities_table = new DataTable('#unpaid_activities_table', {
+                ajax: `/get_unpaid_activities_fines/${selected_student_ID}/${event_id}`,
+                columns: [
+                    { data: 'activity_name' },
+                    { data: 'time_in' },
+                    { data: 'time_out' },
+                    {
+                        data: 'fines',
+                        render: function (data, type, row) {
+                            return `<p>&#8369;${data}</p>`;
+                        },
+                    },
+                ],
+            });
+        
+        }
+
+        
+//------------------paid events----------------------------------------------
+
+
+// Initialize or reinitialize the DataTable
+function initialize_paid_DataTable(selected_student_ID, names) {
+    if ($.fn.DataTable.isDataTable('#paid_events_fines')) {
+        $('#paid_events_fines').DataTable().destroy(); // Corrected destroy
+    }
+
+    paid_events_fines = $('#paid_events_fines').DataTable({
+        responsive: true,
+        stateSave: true,
+        paging: true,
+        scrollCollapse: true,
+        scrollX: true,
+        scrollY: '50vh',
+        select: true,
+
+        layout: {
+            top1Start: 'pageLength',
+            top1End: 'search',
+            topStart: 'info',
+            topEnd: 'paging',
+            top3Start: {
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export',
+                        buttons: [
+                            { extend: 'copy', title: names + " Paid Event Fines", exportOptions: { columns: ':visible', rows: ':visible' } },
+                            { extend: 'print', title: names + " Paid Event Fines", autoPrint: false, exportOptions: { columns: ':visible', rows: ':visible' } },
+                            { extend: 'excel', title: names + " Paid Event Fines", exportOptions: { columns: ':visible', rows: ':visible' } },
+                            { extend: 'csv', title: names + " Paid Event Fines", exportOptions: { columns: ':visible', rows: ':visible' } },
+                            { extend: 'pdf', title: names + " Paid Event Fines", orientation: 'portrait', pageSize: 'LEGAL', exportOptions: { columns: ':visible', rows: ':visible' } } // Fixed portrait
+                        ]
+                    },
+                    {
+                        extend: 'collection',
+                        text: 'Export All Page',
+                        buttons: [
+                            { extend: 'copy', title: names + " Paid Event Fines", exportOptions: { columns: ':visible', modifier: { page: 'all', search: 'none' } } },
+                            { extend: 'print', title: names + " Paid Event Fines", autoPrint: false, exportOptions: { columns: ':visible', modifier: { page: 'all', search: 'none' } } },
+                            { extend: 'excel', title: names + " Paid Event Fines", exportOptions: { columns: ':visible', modifier: { page: 'all', search: 'none' } } },
+                            { extend: 'csv', title: names + " Paid Event Fines", exportOptions: { columns: ':visible', modifier: { page: 'all', search: 'none' } } },
+                            { extend: 'pdf', title: names + " Paid Event Fines", orientation: 'portrait', pageSize: 'LEGAL', exportOptions: { columns: ':visible', modifier: { page: 'all', search: 'none' } } } // Fixed portrait
+                        ]
+                    },
+                    'colvis'  // Column visibility button
+                ]
+            }
+        },
+
+        columnDefs: [
+            {
+                targets: -1,  // Hide the last column (Action buttons)
+                visible: false
+            }
+        ],
+
+        columnDefs: [
+        {
+            "targets": 6, // Target the first column (index 0)
+            "orderable": false // Disable ordering for this column
+        }
+    ],
+
+        ajax: `/get_student_transaction_records/${selected_student_ID}`, // Use selected_student_ID
+        columns: [
+            { data: 'transaction_code' },
+            { data: 'selected_fines_total_amount' },
+            { data: 'amount_pay' },
+            { data: 'changes_amount' },           
+            { data: 'current_balance' },
+            { data: 'transaction_date' },
+            {
+                data: 'id',
+                render: function (data, type, row) {
+                    return `
+                        <button class="delete-btn btn btn-danger btn-sm" 
+                            data-id="${data}" 
+                            style="display:inline;">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        <button class="btn btn-info btn-sm view-details-btn" 
+                        data-id="${data}" 
+                        data-transaction-code="${row.transaction_code}">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                        
+                    `;
+                }
+            }
+        ],
+    });
+}
+
+
+
+$('#paid_events_fines').on('click', '.delete-btn', function() {
+    var transac_id = $(this).data('id');
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'You won\'t be able to undo this!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: 'DELETE',
+                url: `/delete_transaction/${transac_id}`,
+                success: function(response) {
+                    if (response.success) {
+                        paid_events_fines.ajax.reload(null, false);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: response.message,
+                            confirmButtonText: 'OK',
+                            timer: 1500,
+                            timerProgressBar: true
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            confirmButtonText: 'OK',
+                            timer: 1500,
+                            timerProgressBar: true
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred: ' + error,
+                        confirmButtonText: 'OK',
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                }
+            });
+        }
+    });
+});
+
+    //view transaction details
+    $(document).on("click", ".view-details-btn", function () {
+        let transactionId = $(this).data("id");
+        let transactionCode = $(this).data("transaction-code");
+    
+        $("#modalTransactionCode").text(transactionCode);
+        $("#transactionDetailsBody").html('<tr><td colspan="2">Loading...</td></tr>');
+    
+        $.ajax({
+            url: `/get_admin_transaction_events/${transactionId}`,
+            type: "GET",
+            success: function (response) {
+                if (response.success) {
+                    let rows = "";
+                    response.data.forEach(event => {
+                        rows += `<tr>
+                            <td>${event.event_name}</td>
+                             <td>${event.scheduled_date}</td>
+                           
+                        </tr>`;
+                    });
+                    $("#transactionDetailsBody").html(rows);
+                } else {
+                    $("#transactionDetailsBody").html('<tr><td colspan="2">No data available.</td></tr>');
+                }
+            },
+            error: function () {
+                $("#transactionDetailsBody").html('<tr><td colspan="2">Error fetching data.</td></tr>');
+            }
+        });
+    
+        $("#transactionDetailsModal").modal("show");
+    });
+    
+
+
+
+
+
+//----------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+    // Handle student selection
+    $('.add-payment-btn').on('click', function () {
+        let studentId = $('#selected_student_ID').val();
+        if (studentId) {
+            fetchPaymentData(studentId);
+        }
+    });
+
+    // Fetch payment data for selected student
+    function fetchPaymentData(studentId) {
+        if (!studentId) {
+            console.error('No student ID provided.');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Fetching Payment Data...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        $.get(`/get_payments_amount/${studentId}`, function (response) {
+            Swal.close();
+            if (!response.success) {
+                Swal.fire('Error', 'Failed to fetch payment data. Please try again.', 'error');
+                return;
+            }
+
+            const eventsContainer = $('#eventsModal .modal-body');
+            eventsContainer.empty();
+
+            response.data.forEach(function (event) {
+                const checkbox = $('<input>', {
+                    type: 'checkbox',
+                    name: 'event',
+                    value: event.total_fines,
+                    id: `event_${event.id}`,
+                    class: 'event-checkbox'
+                });
+
+                const label = $('<label>', {
+                    for: `event_${event.id}`,
+                    text: `${event.event_name} - ₱${parseFloat(event.total_fines).toFixed(2)} | ${event.scheduled_date}`
+                });
+
+                const div = $('<div>').append(checkbox, label);
+                eventsContainer.append(div);
+            });
+
+        }).fail(function () {
+            Swal.close();
+            Swal.fire('Error', 'Failed to fetch payment data. Please check your connection.', 'error');
+        });
+    }
+
+    // Update total fine when checkboxes change
+    $(document).on('change', '.event-checkbox', function () {
+        let totalFine = 0;
+        $('.event-checkbox:checked').each(function () {
+            totalFine += parseFloat($(this).val());
+        });
+        $('#totalFine').text(`Total Fine: ₱${totalFine.toFixed(2)}`);
+    });
+
+    // Save selected events
+    $('#saveEvents').on('click', function () {
+        const selectedEvents = [];
+        let totalFine = 0;
+
+        $('.event-checkbox:checked').each(function () {
+            const eventId = $(this).attr('id').split('_')[1];
+            const eventName = $(this).next('label').text();
+            const fineAmount = parseFloat($(this).val());
+
+            totalFine += fineAmount;
+
+            selectedEvents.push({ id: eventId, name: eventName, total: fineAmount });
+            $(this).prop('disabled', true);
+        });
+
+        const selectedEventsContainer = $('#selectedEvents');
+        selectedEventsContainer.empty();
+
+        if (selectedEvents.length > 0) {
+            selectedEvents.forEach(event => {
+                selectedEventsContainer.append(
+                    $('<div>', {
+                        text: event.name,
+                        class: 'mb-2',
+                        'data-event': JSON.stringify({ id: event.id, total: event.total })
+                    })
+                );
+            });
+        } else {
+            selectedEventsContainer.append('<div>No events selected</div>');
+        }
+
+        $('#totalFine').text(`Total Fine: ₱${totalFine.toFixed(2)}`);
+        $('#eventsModal').modal('hide');
+    });
+
+    // Reset modal when closed
+    $('#eventsModal').on('hidden.bs.modal', function () {
+        $('.event-checkbox').prop('checked', false).prop('disabled', false);
+        
+    });
+
+    // Handle form submission for payments
+    $('#add_payment').on('submit', function (e) {
+        e.preventDefault();
+
+        const selectedEvents = [];
+        $('#selectedEvents div').each(function () {
+            const eventData = $(this).data('event');
+            if (eventData) {
+                selectedEvents.push(eventData.id);
+            }
+        });
+
+        if (selectedEvents.length === 0) {
+            Swal.fire('Warning', 'Please select at least one event.', 'warning');
+            return;
+        }
+
+        const studentId = $('#selected_student_ID').val();
+        let totalFine = 0;
+
+        selectedEvents.forEach(eventId => {
+            totalFine += parseFloat($(`#event_${eventId}`).val());
+        });
+
+        let enteredAmount = parseFloat($('#amount_pay').val());
+        if (isNaN(enteredAmount) || enteredAmount < totalFine) {
+            Swal.fire('Error', 'Entered amount should be equal to or greater than the total fine.', 'error');
+            return;
+        }
+
+        const paymentData = {
+            student_id: studentId,
+            event_ids: selectedEvents,
+            total_fine: totalFine,
+            amount_pay: enteredAmount
+        };
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Total Payment: ₱${totalFine.toFixed(2)}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, submit it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Processing Payment...',
+                    allowOutsideClick: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                $.ajax({
+                    url: `/submit_payment/${studentId}`,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(paymentData),
+                    success: function () {
+                        
+                        Swal.fire('Success', `Payment submitted successfully!\nTotal Paid: ₱${totalFine.toFixed(2)}`, 'success');
+
+                        $('#totalFine').text('Total Fine: ₱0.00');
+                        $('#selectedEvents').empty();
+                        fetchStudentBalance(studentId);
+                        initializeDataTable(studentId);
+                        fetchPaymentData(studentId);
+                        initialize_paid_DataTable(studentId);
+                    },
+                    error: function () {
+                        Swal.close();
+                        Swal.fire('Error', 'Failed to submit payment. Please try again.', 'error');
+                    }
+                });
+            }
+        });
+    });
+    });
+
+
+    
+</script>
+{% endblock %}

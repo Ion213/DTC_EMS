@@ -1,0 +1,113 @@
+{% extends 'admin_base_top_nav.html' %}
+
+{% block title %}
+    MANAGE EVENT FEES
+{% endblock %}
+
+{% block content %}     
+    <style>
+        .container {
+            max-width: 2560px;
+            max-height: 2260px; /* Limit container width for better layout */
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            overflow-y: auto;
+
+        }
+    body {
+        background-color: rgb(152, 165, 167);
+    }
+    </style>
+
+<nav id="pub_nav" class="navbar navbar-expand-lg navbar-light border-success bg-success bg-opacity-25 py5">
+    <div class="container-fluid">
+        <a class="nav-link" href="{{ url_for('admin_manage_event.manage_event_render_template') }}"> <i class="fa-solid fa-arrow-rotate-left"></i>Back to Events</a>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="border p-3 bg-opacity-25">
+        <div class="row">
+            <div class="col-lg-3 col-md-4 mb-4">
+            <div class="border p-3">
+                    <h2 class="fs-3 fw-bold fst-italic">Add Event Fee</h2>
+                    <!--add fees form--->
+                    <form id="add_fees_form">
+                        <input type="hidden" id="selected_event_idT" name="selected_event_idT" value="{{selected_event.id}}">
+                        <div class="mb-3">
+                            <label for="fees_nameT" class="form-label">Fee Name</label>
+                            <input type="text" class="form-control" id="fees_nameT" name="fees_nameT" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fees_amountT" class="form-label">Amount (₱)</label>
+                            <input type="number" class="form-control" id="fees_amountT" name="fees_amountT" step="0.01" min="0" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Event Fee</button>
+                    </form>
+
+                </div>
+            </div>
+
+            <!-- Fees Table (Larger) -->
+            <div class="col-lg-9 col-md-8 mb-8">
+            <div class="border p-3">
+                    <h1 class="fs-3 fw-bold fst-italic"> {{ selected_event.event }} fees</h1>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped" id="fees_table" data-event-id="{{ selected_event.id }}" data-event-name="{{ selected_event.event }}" class="display" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Fees Name</th>
+                                    <th>Amount</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!---->
+
+<!-- Update fees Modal -->
+<div class="modal fade" id="update_fees_modal" tabindex="-1" aria-labelledby="update_fees_modal_label" >
+    <div class="modal-dialog" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="update_fees_modal_label">Update Fee</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="update_fees_form">
+                    <input type="hidden" id="selected_event_idT" name="selected_event_idT" value="{{selected_event.id}}">
+                    <input type="hidden" id="selected_fees_idT" name="selected_fees_idT">
+                    <div class="mb-3">
+                        <label for="update_fees_nameT" class="form-label">Event Fees Name</label>
+                        <input type="text" class="form-control" id="update_fees_nameT" name="update_fees_nameT" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="update_fees_amountT" class="form-label">Fees Amount(₱)</label>
+                        <input type="number" class="form-control" id="update_fees_amountT" name="update_fees_amountT" step="0.01" min="0">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='scripts/admin_manage_fees/fees_table.js') }}">
+</script>
+
+<script src="{{ url_for('static', filename='scripts/admin_manage_fees/fees_add.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_fees/fees_delete.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_fees/fees_update.js') }}">
+</script>
+
+{% endblock %}

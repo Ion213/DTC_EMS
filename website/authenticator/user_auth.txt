@@ -1,0 +1,47 @@
+user_auth = Blueprint('user_auth', __name__)
+@user_auth.route('/admin_login_render_template', methods=['GET', 'POST'])
+def admin_login_render_template():
+    if current_user.is_authenticated:
+        return redirect_user_based_on_role(current_user.role)
+    
+    if request.method == 'POST':
+        try:
+            email = request.form.get('emailT')
+            password = request.form.get('passwordT')
+
+            if not email or not password:
+                return jsonify({'success': False, 'message': 'Please input email and password'})
+
+            # Fetch user by email
+            valid_user = User.query.filter_by(email=email).first()
+
+            if valid_user:
+                if valid_user.role in ['admin', 'ssg']:  
+                    # Admin & SSG passwords are stored as plaintext (temporarily)
+                    password_match = valid_user.password == password
+                else:  
+                    # Students' passwords are hashed, so we check using `check_password_hash()`
+                    password_match = check_password_hash(valid_user.password, password)
+
+                if password_match:
+                    login_user(valid_user,remember=True)
+
+                    if valid_user.role in ['admin', 'ssg']:
+                        return jsonify({
+                            'success': True, 
+                            'message': 'Login Successfully',
+                            'redirect_url': url_for('admin_manage_event.manage_event_render_template')
+                        })
+                    elif valid_user.role == 'student':
+                        return jsonify({
+                            'success': True, 
+                            'message': 'Login Successfully',
+                            'redirect_url': url_for('user_side.user_side_render_template')
+                        })
+
+            return jsonify({'success': False, 'message': 'Invalid credentials'})
+
+        except Exception as e:
+            return jsonify({'success': False, 'message': f'Error {e}'})
+
+    return render_template('public_user_auth.html')

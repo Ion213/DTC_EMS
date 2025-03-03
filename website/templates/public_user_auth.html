@@ -1,0 +1,115 @@
+{% extends 'public_base_top_nav.html' %}
+
+{% block title %}
+    USER LOGIN
+{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: hsl(134, 36%, 58%);
+    }
+</style>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">USER LOGIN</div>
+                    <div class="card-body">
+                        <form id="user_login_form">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" class="form-control" name="emailT" id="email" placeholder="Enter Email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="passwordT" id="password" placeholder="Enter Password" required minlength="6" maxlength="20">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">Password must be between 6 and 20 characters.</small>
+                            </div>
+                            <br/>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+ <!-- Include jQuery from CDN -->
+ <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include SweetAlert2 from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Include Font Awesome for Eye Icon -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Show/Hide Password Functionality
+            $("#togglePassword").click(function () {
+                let passwordField = $("#password");
+                let icon = $(this).find("i");
+
+                if (passwordField.attr("type") === "password") {
+                    passwordField.attr("type", "text");
+                    icon.removeClass("fa-eye").addClass("fa-eye-slash");
+                } else {
+                    passwordField.attr("type", "password");
+                    icon.removeClass("fa-eye-slash").addClass("fa-eye");
+                }
+            });
+
+            // Login Form Submission
+            $("#user_login_form").submit(function (event) {
+        event.preventDefault(); // Prevent default form submission
+
+        $.ajax({
+            url: "{{ url_for('user_auth.admin_login_render_template') }}",  // Ensure it's correct
+            type: "POST",
+            data: $(this).serialize(), // Serialize form data
+            dataType: "json",
+            success: function (data) {
+                if (data.success) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Login Successful",
+                        text: data.message,
+                        confirmButtonColor: "#3085d6",
+                        confirmButtonText: "OK",
+                        timer: 1500,
+                        timerProgressBar: true
+                    }).then(() => {
+                        window.location.href = data.redirect_url;
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Login Failed",
+                        text: data.message,
+                        confirmButtonColor: "#d33",
+                        confirmButtonText: "Try Again",
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error: ", status, error);  // Debugging
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Something went wrong. Please try again later.",
+                    confirmButtonColor: "#d33",
+                    confirmButtonText: "OK",
+                    timer: 1500,
+                    timerProgressBar: true
+                });
+            }
+        });
+    });
+        });
+    </script>
+{% endblock %}

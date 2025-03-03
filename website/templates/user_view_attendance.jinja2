@@ -1,0 +1,702 @@
+{% extends 'user_base_top_nav.html' %}
+
+{% block title %}
+    ATTENDANCE AND FINES
+{% endblock %}
+
+{% block content %}
+
+<style>
+  .container { max-width: 2560px; max-height: 2260px;} 
+  .table-responsive { overflow-x: auto; overflow-y:auto; } 
+  body {
+        background-color: hsl(134, 36%, 58%);
+    }
+</style>
+<div class="container mt-1">
+    <div class="row">
+        <div class="col-md-12 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3><i class="fa-solid fa-peso-sign"></i> | <i class="fa-solid fa-clipboard-user"></i></h3>
+                </div>
+                <div class="card-body">
+                    <hr>
+
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs mb-3" id="profileTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="fines-tab" data-bs-toggle="tab" data-bs-target="#fines" type="button">
+                                View Fines
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="attended-tab" data-bs-toggle="tab" data-bs-target="#attended" type="button">
+                                View Attendance
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content">
+                        <!-- View Fines Tab -->
+                        <div class="tab-pane fade show active" id="fines">
+                            <div class="row">
+                            <!-- Current Balance -->
+                            <div class="col-sm-12 col-md-12 col-lg-12 mb-4 ">
+                                <div class="card border-warning h-100">
+                                    <div class="card-header bg-warning text-white">Current Balance</div>
+                                    <div class="card-body text-center">
+                                        {%if current_balance%}
+                                        <h3 class="text-warning">₱ <span id="current-balance">{{current_balance}}</span></h3>
+                                        {%else%}
+                                        <h3 class="text-warning">₱ <span id="current-balance">0.00</span></h3>
+                                        {%endif%}
+                                    </div>
+                                </div>
+                            </div>
+
+                            </div>
+
+                             <div class="row">
+                                        <!-- Payments History -->
+                            <div class="col-md-8 mb-4">
+                                <div class="card border-primary h-100">
+                                    <div class="card-header bg-primary text-white">Transaction History</div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-striped" id="paid_events_fines">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>Trasaction Code </th>
+                                                        <th>Total Paid Fines</th>
+                                                        <th>Payment Cash Amount</th>
+                                                        <th>Payment Change</th>
+                                                        <th>Balance</th>
+                                                        <th>Transaction Date</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- Unpaid Fines -->
+                            <div class="col-md-4 mb-4">
+                                <div class="card border-danger h-100">
+                                    <div class="card-header bg-danger text-white">Unpaid Event Fines</div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table id="unpaid_fines_table" class="table table-bordered table-striped">
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th>Event Name</th>
+                                                        <th>Activities | Total fines</th>
+                                                        <th>Date</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            </div>
+
+
+                        </div>
+
+                        <!-- View Attendance Tab -->
+                        <div class="tab-pane fade" id="attended">
+                            <div class="table-responsive">
+                                <table id="attendedTable" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Event Name</th>
+                                            <th>Activity Name</th>
+                                            <th>Time In</th>
+                                            <th>Time Out</th>
+                                            <th>Activity Fines</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Show Activities Modal -->
+<div class="modal fade" id="show_unpaid_activities_modal" tabindex="-1" aria-labelledby="show_unpaid_activities_modal_label">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="show_unpaid_activities_modal_label">Unpaid Activities</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5 class="modal-title" id="event_name">Event Name</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="unpaid_activities_table">
+                        <thead>
+                            <tr>
+                                <th>Activity Name</th>
+                                <th>Time In</th>
+                                <th>Time Out</th>
+                                <th>Fines</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Transaction details -->
+<div class="modal fade" id="transactionDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Paid Events</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Transaction Code: <span id="modalTransactionCode"></span></h6>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Event Date Ended</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionDetailsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+
+$(document).ready(function () {
+    // Check if there's an active tab stored in localStorage
+    var activeTab = localStorage.getItem('activeTab');
+
+    if (activeTab) {
+        var targetTab = $('#profileTabs button[data-bs-target="' + activeTab + '"]');
+        targetTab.tab('show');
+    } else {
+        $('#profileTabs button:first').tab('show');
+    }
+
+    // Listen for tab clicks and store the active tab in localStorage
+    $('#profileTabs button').on('shown.bs.tab', function (e) {
+        var tabId = $(e.target).attr('data-bs-target');
+        localStorage.setItem('activeTab', tabId);
+    });
+});
+
+var table;
+var unpaid_fines_table
+var paid_events_fines
+    //RENDER attendance DATA
+$(document).ready(function() {
+    table = new DataTable('#attendedTable', {
+
+        //table tools
+        responsive:true,
+        stateSave: true,
+        paging: true,
+        scrollCollapse: true,
+        scrollX: true,
+        scrollY: '120vh',
+        select: true,
+
+        layout: {
+            top1Start: 'pageLength',
+            top1End: 'search',
+            topStart: 'info',
+            topEnd: 'paging',
+
+            top3Start: {
+                buttons: [{
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        {extend: 'copy',
+                            title:  `{{current_user.first_name}}{{current_user.last_name}} Attendance`,
+                            footer: false,
+                            exportOptions: {columns: ':visible',rows: ':visible'},
+                            },
+                            
+                        {extend: 'print',
+                            title: `{{current_user.first_name}}{{current_user.last_name}} Attendance`,
+                            footer: false,
+                            autoPrint: false,
+                            exportOptions: {columns: ':visible',rows: ':visible'}
+                            }, 
+
+                        {extend: 'excel',
+                            title: `{{current_user.first_name}}{{current_user.last_name}} Attendance`,
+                            footer: false,
+                            exportOptions: {columns: ':visible',rows: ':visible'},
+                            },   
+
+                        {extend: 'csv',
+                            title: `{{current_user.first_name}}{{current_user.last_name}} Attendance`,
+                            footer: false,
+                            exportOptions: {columns: ':visible',rows: ':visible'},
+                            },
+
+                        {extend: 'pdf',
+                            title: `{{current_user.first_name}}{{current_user.last_name}} Attendance`,
+                            footer: false,
+                            orientation: 'protrait',
+                            pageSize: 'LEGAL',
+                            exportOptions: {columns: ':visible',rows: ':visible'},
+                            },      
+                ]},
+
+                    {
+                    extend: 'collection',
+                    text: 'Export All Page',
+                    buttons: [
+                        {extend: 'copy',
+                            title: `{{current_user.first_name}}{{current_user.last_name}} Attendance`,
+                            footer: false,
+                            exportOptions: {
+                                columns: ':visible',
+                                modifier: {
+                                    page: 'all',
+                                    search: 'none'   
+                                    },
+                                },
+                        },
+                            
+                        {extend: 'print',
+                            title: `{{current_user.first_name}}{{current_user.last_name}} Attendance`,
+                            footer: false,
+                            autoPrint: false,
+                            exportOptions: {
+                                columns: ':visible',
+                                modifier: {
+                                    page: 'all',
+                                    search: 'none'   
+                                    },
+                                },
+                            }, 
+
+                        {extend: 'excel',
+                            title: `{{current_user.first_name}}{{current_user.last_name}} Attendance`,
+                            footer: false,
+                            exportOptions: {
+                                columns: ':visible',
+                                modifier: {
+                                    page: 'all',
+                                    search: 'none'   
+                                    },
+                                },
+                            },   
+
+                        {extend: 'csv',
+                            title: `{{current_user.first_name}}{{current_user.last_name}} Attendance`,
+                            footer: false,
+                            exportOptions: {
+                                columns: ':visible',
+                                modifier: {
+                                    page: 'all',
+                                    search: 'none'   
+                                    },
+                                },
+                            },
+
+                        {extend: 'pdf',
+                            title: `{{current_user.first_name}}{{current_user.last_name}} Attendance`,
+                            footer: false,
+                            orientation: 'protrait',
+                            pageSize: 'LEGAL',
+                            exportOptions: {
+                                columns: ':visible',
+                                modifier: {
+                                    page: 'all',
+                                    search: 'none'   
+                                    },
+                                },
+                            },
+
+                    ]},
+                    'colvis'  // Column visibility button
+                ]
+            }
+        }, 
+        columnDefs: [
+            {
+                targets: -1,  // Hide the last column (Action buttons)
+                visible: false
+            }
+        ],
+        columnDefs: [
+                    {
+                        "targets":[3,4] , // Target the first column (index 0)
+                        "orderable": false // Disable ordering for this column
+                    }
+                ],
+
+    //table fetch data
+        ajax: '/get_attended_data',
+        columns: [
+            { data: 'event_name' },
+            { data: 'activity_name' }, 
+            { data: 'time_in' },
+            { data: 'time_out' },  
+            {data:'activity_fines'},
+            { data: 'status' },  
+        ],
+        
+    }); 
+    
+    
+
+
+    
+        
+    
+            unpaid_fines_table = $('#unpaid_fines_table').DataTable({
+               //table tools
+                responsive:true,
+                stateSave: true,
+                paging: true,
+                scrollCollapse: true,
+                scrollX: true,
+                scrollY: '50vh',
+                select: true,
+
+                layout: {
+                    top1Start: 'pageLength',
+                    top1End: 'search',
+                    topStart: 'info',
+                    topEnd: 'paging',
+
+                    top3Start: {
+                        buttons: [{
+                            extend: 'collection',
+                            text: 'Export',
+                            buttons: [
+                                {extend: 'copy',
+                                    title: `{{current_user.first_name}}{{current_user.last_name}} Fines`,
+                                    footer: false,
+                                    exportOptions: {columns: ':visible',rows: ':visible'},
+                                    },
+                                    
+                                {extend: 'print',
+                                    title: `{{current_user.first_name}}{{current_user.last_name}} Fines`,
+                                    footer: false,
+                                    autoPrint: false,
+                                    exportOptions: {columns: ':visible',rows: ':visible'}
+                                    }, 
+
+                                {extend: 'excel',
+                                    title: `{{current_user.first_name}}{{current_user.last_name}} Fines`,
+                                    footer: false,
+                                    exportOptions: {columns: ':visible',rows: ':visible'},
+                                    },   
+
+                                {extend: 'csv',
+                                    title: `{{current_user.first_name}}{{current_user.last_name}} Fines`,
+                                    footer: false,
+                                    exportOptions: {columns: ':visible',rows: ':visible'},
+                                    },
+
+                                {extend: 'pdf',
+                                    title: `{{current_user.first_name}}{{current_user.last_name}} Fines`,
+                                    footer: false,
+                                    orientation: 'protrait',
+                                    pageSize: 'LEGAL',
+                                    exportOptions: {columns: ':visible',rows: ':visible'},
+                                    },      
+                        ]},
+
+                            {
+                            extend: 'collection',
+                            text: 'Export All Page',
+                            buttons: [
+                                {extend: 'copy',
+                                    title:`{{current_user.first_name}}{{current_user.last_name}} Fines`,
+                                    footer: false,
+                                    exportOptions: {
+                                        columns: ':visible',
+                                        modifier: {
+                                            page: 'all',
+                                            search: 'none'   
+                                            },
+                                        },
+                                },
+                                    
+                                {extend: 'print',
+                                    title: `{{current_user.first_name}}{{current_user.last_name}} Fines`,
+                                    footer: false,
+                                    autoPrint: false,
+                                    exportOptions: {
+                                        columns: ':visible',
+                                        modifier: {
+                                            page: 'all',
+                                            search: 'none'   
+                                            },
+                                        },
+                                    }, 
+
+                                {extend: 'excel',
+                                    title: `{{current_user.first_name}}{{current_user.last_name}} Fines`,
+                                    footer: false,
+                                    exportOptions: {
+                                        columns: ':visible',
+                                        modifier: {
+                                            page: 'all',
+                                            search: 'none'   
+                                            },
+                                        },
+                                    },   
+
+                                {extend: 'csv',
+                                    title: `{{current_user.first_name}}{{current_user.last_name}} Fines`,
+                                    footer: false,
+                                    exportOptions: {
+                                        columns: ':visible',
+                                        modifier: {
+                                            page: 'all',
+                                            search: 'none'   
+                                            },
+                                        },
+                                    },
+
+                                {extend: 'pdf',
+                                    title: `{{current_user.first_name}}{{current_user.last_name}} Fines`,
+                                    footer: false,
+                                    orientation: 'protrait',
+                                    pageSize: 'LEGAL',
+                                    exportOptions: {
+                                        columns: ':visible',
+                                        modifier: {
+                                            page: 'all',
+                                            search: 'none'   
+                                            },
+                                        },
+                                    },
+
+                            ]},
+                            'colvis'  // Column visibility button
+                        ]
+                    }
+                }, 
+                columnDefs: [
+                    {
+                        targets: -1,  // Hide the last column (Action buttons)
+                        visible: false
+                    }
+                ],
+                ajax: `/get_student_unpaid_event_fines`, // Use selected_student_ID
+                columns: [
+                    { data: 'event_name' },
+                    {
+                        data: 'id',
+                        render: function (data, type, row) {
+                            return `
+                                <button class="activities-view-btn btn btn-warning btn-sm" 
+                                    data-id="${data}" 
+                                    data-event_name="${row.event_name}"
+                                    style="display:inline;">
+                                     <i class="fa-solid fa-eye"></i>${row.activity_counts} | &#8369; ${row.total_fines}
+                                </button>
+                            `;
+                        },
+                    },
+                    { data: 'scheduled_date' },
+                ],
+            });
+
+
+
+            // View unpaid activities
+        $('#unpaid_fines_table').on('click', '.activities-view-btn', function () {
+            var event_id = $(this).data('id');
+            var event_name = $(this).data('event_name');
+            $('#event_name').text(event_name);
+    
+            // Show the modal
+            $('#show_unpaid_activities_modal').modal('show');
+    
+            // Load activities for this event using AJAX
+            loadActivities(event_id);
+        });
+    
+        // Function to load activities in the modal
+        function loadActivities(event_id) {
+            if ($.fn.DataTable.isDataTable('#unpaid_activities_table')) {
+                unpaid_activities_table.destroy(); // Destroy existing DataTable if it exists
+            }
+            unpaid_activities_table = new DataTable('#unpaid_activities_table', {
+                ajax: `/get_student_unpaid_activities_fines/${event_id}`,
+                columns: [
+                    { data: 'activity_name' },
+                    { data: 'time_in' },
+                    { data: 'time_out' },
+                    {
+                        data: 'fines',
+                        render: function (data, type, row) {
+                            return `<p>&#8369;${data}</p>`;
+                        },
+                    },
+                ],
+            });
+        
+        }
+
+
+
+    //transactionhistory
+    paid_events_fines = $('#paid_events_fines').DataTable({
+        responsive: true,
+        stateSave: true,
+        paging: true,
+        scrollCollapse: true,
+        scrollX: true,
+        scrollY: '50vh',
+        select: true,
+
+        layout: {
+            top1Start: 'pageLength',
+            top1End: 'search',
+            topStart: 'info',
+            topEnd: 'paging',
+            top3Start: {
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export',
+                        buttons: [
+                            { extend: 'copy', title: `{{current_user.first_name}}{{current_user.last_name}} Paid Fines`, exportOptions: { columns: ':visible', rows: ':visible' } },
+                            { extend: 'print', title: `{{current_user.first_name}}{{current_user.last_name}} Paid Fines`, autoPrint: false, exportOptions: { columns: ':visible', rows: ':visible' } },
+                            { extend: 'excel', title: `{{current_user.first_name}}{{current_user.last_name}} Paid Fines`, exportOptions: { columns: ':visible', rows: ':visible' } },
+                            { extend: 'csv', title: `{{current_user.first_name}}{{current_user.last_name}} Paid Fines`, exportOptions: { columns: ':visible', rows: ':visible' } },
+                            { extend: 'pdf', title: `{{current_user.first_name}}{{current_user.last_name}} Paid Fines`, orientation: 'portrait', pageSize: 'LEGAL', exportOptions: { columns: ':visible', rows: ':visible' } } // Fixed portrait
+                        ]
+                    },
+                    {
+                        extend: 'collection',
+                        text: 'Export All Page',
+                        buttons: [
+                            { extend: 'copy', title: `{{current_user.first_name}}{{current_user.last_name}} Paid Fines`, exportOptions: { columns: ':visible', modifier: { page: 'all', search: 'none' } } },
+                            { extend: 'print', title: `{{current_user.first_name}}{{current_user.last_name}} Paid Fines`, autoPrint: false, exportOptions: { columns: ':visible', modifier: { page: 'all', search: 'none' } } },
+                            { extend: 'excel', title: `{{current_user.first_name}}{{current_user.last_name}} Paid Fines`, exportOptions: { columns: ':visible', modifier: { page: 'all', search: 'none' } } },
+                            { extend: 'csv', title: `{{current_user.first_name}}{{current_user.last_name}} Paid Fines`, exportOptions: { columns: ':visible', modifier: { page: 'all', search: 'none' } } },
+                            { extend: 'pdf', title: `{{current_user.first_name}}{{current_user.last_name}} Paid Fines`, orientation: 'portrait', pageSize: 'LEGAL', exportOptions: { columns: ':visible', modifier: { page: 'all', search: 'none' } } } // Fixed portrait
+                        ]
+                    },
+                    'colvis'  // Column visibility button
+                ]
+            }
+        },
+
+        columnDefs: [
+            {
+                targets: -1,  // Hide the last column (Action buttons)
+                visible: false
+            }
+        ],
+
+        columnDefs: [
+        {
+            "targets": 6, // Target the first column (index 0)
+            "orderable": false // Disable ordering for this column
+        }
+    ],
+
+        ajax: `/get_student_transaction_history`, // Use selected_student_ID
+        columns: [
+            { data: 'transaction_code' },
+            { data: 'selected_fines_total_amount' },
+            { data: 'amount_pay' },
+            { data: 'changes_amount' },           
+            { data: 'current_balance' },
+            { data: 'transaction_date' },
+            {
+                data: 'id',
+                render: function (data, type, row) {
+                    return `
+                    <button class="btn btn-info btn-sm view-details-btn" 
+                        data-id="${data}" 
+                        data-transaction-code="${row.transaction_code}">
+                        <i class="fa-solid fa-eye"></i> View Details
+                    </button>
+                        
+                    `;
+                }
+            }
+        ],
+    });
+
+
+    //view transaction details
+    $(document).on("click", ".view-details-btn", function () {
+    let transactionId = $(this).data("id");
+    let transactionCode = $(this).data("transaction-code");
+
+    $("#modalTransactionCode").text(transactionCode);
+    $("#transactionDetailsBody").html('<tr><td colspan="2">Loading...</td></tr>');
+
+    $.ajax({
+        url: `/get_transaction_events/${transactionId}`,
+        type: "GET",
+        success: function (response) {
+            if (response.success) {
+                let rows = "";
+                response.data.forEach(event => {
+                    rows += `<tr>
+                        <td>${event.event_name}</td>
+                         <td>${event.scheduled_date}</td>
+                       
+                    </tr>`;
+                });
+                $("#transactionDetailsBody").html(rows);
+            } else {
+                $("#transactionDetailsBody").html('<tr><td colspan="2">No data available.</td></tr>');
+            }
+        },
+        error: function () {
+            $("#transactionDetailsBody").html('<tr><td colspan="2">Error fetching data.</td></tr>');
+        }
+    });
+
+    $("#transactionDetailsModal").modal("show");
+});
+
+
+});
+
+$(document).ready(function() {
+    // Listen for clicks on tabs
+    $('#attended-tab').on('click', function(event) {
+        table.ajax.reload(null, false);
+        unpaid_fines_table.ajax.reload(null,false);
+    });
+});
+
+</script>
+{% endblock %}

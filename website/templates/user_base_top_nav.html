@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}User Dashboard{% endblock %}</title>
+
+    <script src="{{ url_for('static', filename='htmx2.0.4/htmx.min.js') }}"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap5.3/css/bootstrap.min.css') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome-free-6.5.2-web/css/all.min.css') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='sweet-alert/css/sweetalert2.min.css') }}">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='data-tables/css/dataTables.dataTables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='data-tables/css/buttons.dataTables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='data-tables/css/select.dataTables.min.css') }}">
+
+    <script src="{{ url_for('static', filename='bootstrap5.3/js/bootstrap.bundle.min.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='jquery3.7.1/jquery-3.7.1.min.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='sweet-alert/js/sweetalert2@11.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='data-tables/js/dataTables.js') }}"></script>
+    <script src="{{ url_for('static', filename='data-tables/js/dataTables.buttons.js') }}"></script>
+    <script src="{{ url_for('static', filename='data-tables/js/buttons.dataTables.js') }}"></script>
+    <script src="{{ url_for('static', filename='data-tables/js/buttons.colVis.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='data-tables/js/dataTables.select.js') }}"></script>
+    <script src="{{ url_for('static', filename='data-tables/js/select.dataTables.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='data-tables/js/buttons.html5.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='data-tables/js/jszip.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='data-tables/js/pdfmake.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='data-tables/js/vfs_fonts.js') }}"></script>
+    <script src="{{ url_for('static', filename='data-tables/js/buttons.print.min.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='html5-qrcode-scanner/html5-qrcode.min.js') }}">
+    </script>
+
+    <style>
+        .navbar-brand img {
+            height: 40px;
+            border-radius: 50%;
+        }
+        .navbar-nav .nav-item .nav-link {
+            font-size: 16px;
+        }
+        .dropdown-menu {
+            min-width: 180px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color:#b7c6bf">
+        <div class="container">
+            <!-- Logo and Brand -->
+            <a class="navbar-brand" href="#">
+                <img src="{{ url_for('static', filename='logo/dtc.png') }}" alt="Logo" width="50" height="50">
+                DTC EMS
+            </a>
+
+            <!-- Toggle Button for Mobile View -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user_view_attendance.user_render_attendance_page') }}">
+                            <i class="fa-solid fa-peso-sign"></i> | <i class="fa-solid fa-clipboard-user"></i> Fines & Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user_view_events.render_user_events_page') }}">
+                            <i class="fa-solid fa-calendar"></i> Events
+                        </a>
+                    </li>
+
+                    
+                    <!-- User Dropdown Menu -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> {{ current_user.first_name }} {{ current_user.last_name }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('user_side.user_side_render_template') }}">
+                                <i class="fas fa-user"></i> My Profile</a><li>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i> Logout</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container mt-4">
+        {% block content %}
+
+        {% endblock %}
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Logout function with SweetAlert confirmation
+            $("#logoutBtn").click(function(event) {
+                event.preventDefault();
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You will be logged out of your account.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Logout"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.post("{{ url_for('user_auth.user_logout') }}", function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: "success",
+                                    title: "Logged Out",
+                                    text: "You have been logged out successfully!",
+                                    confirmButtonColor: "#3085d6"
+                                }).then(() => {
+                                    window.location.href = response.redirect_url;
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Logout Failed",
+                                    text: "Something went wrong, please try again!",
+                                    confirmButtonColor: "#d33"
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

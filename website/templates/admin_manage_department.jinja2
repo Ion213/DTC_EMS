@@ -1,0 +1,449 @@
+{% extends 'admin_base_top_nav.html' %}
+
+{% block title %}
+    MANAGE DEPARTMENTS
+{% endblock %}
+{% block content %}
+
+<style>
+    .container {
+        max-width: 2560px;
+        max-height: 2260px; /* Limit container width for better layout */
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: auto;
+
+    }
+body {
+        background-color: hsl(134, 36%, 58%);
+    }
+</style>
+
+<div class="container mt-5">
+<h2 class="text-center fw-bold mb-4">📚🔬💻⚙️ Manage Departments</h2>
+    <div class="border p-3 bg-opacity-25 ">
+        <div class="row">
+            <!-- Add department Form (Smaller) -->
+            <div class="col-lg-3 col-md-3 mb-2 " >
+                <div class="border p-3">
+                    <h1 class="fs-3 fw-bold fst-italic"> <i class="fa-solid fa-building-user"></i> Add Department</h1>
+                    <form id="add_department_form" method="POST">
+                        <div class="mb-3">
+                            <label for="department_nameT" class="form-label">DEPARTMENT NAME</label>
+                            <input type="text" class="form-control" id="department_nameT" name="department_nameT" required>
+                        </div>
+                        <div class="mb-3"
+                        <label for="yearT" class="form-label">Year:</label>
+                        <select id="yearT" name="yearT" required>
+                            <option value="1st Year">1st Year </option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                            <option value="4th Year">4th Year </option>
+                        </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sectionT" class="form-label">SECTION</label>
+                            <input type="text" class="form-control" id="sectionT" name="sectionT" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-plus"></i>Add DEPARTMENT
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Department Table (Larger) -->
+            <div class="col-lg-9 col-md-9 mb-9">
+            <div class="border p-3">
+                <h1 class="fs-3 fw-bold fst-italic">Departments</h1>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="department_table" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>DEPARTMENT NAME</th>
+                                <th>YEAR</th>
+                                <th>SECTION</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            </div>
+
+            <br>
+        </div>
+    </div>
+</div>
+
+
+<!--department update modal-->
+<div class="modal fade" id="update_department_modal" tabindex="-1" aria-labelledby="update_department_modal_label" >
+    <div class="modal-dialog" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="update_department_modal_label">Update Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="update_department_form">
+                    <input type="hidden" id="selected_department_idT" name="selected_department_idT">
+                    <div class="mb-3">
+                        <label for="update_department_nameT" class="form-label">Event Name</label>
+                        <input type="text" class="form-control" id="update_department_nameT" name="update_department_nameT" required>
+                    </div>
+                        <div class="mb-3"
+                        <label for="update_yearT" class="form-label">Year:</label>
+                        <select id="update_yearT" name="update_yearT" required>
+                            <option value="1st Year">1st Year </option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                            <option value="4th Year">4th Year </option>
+                        </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="update_sectionT" class="form-label">SECTION</label>
+                            <input type="text" class="form-control" id="update_sectionT" name="update_sectionT" required>
+                        </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var department_table;
+    //RENDER department DATA
+$(document).ready(function() {
+    department_table = new DataTable('#department_table', {
+        //table tools
+        responsive:true,
+        stateSave: true,
+        paging: true,
+        scrollCollapse: true,
+        scrollX: true,
+        scrollY: '50vh',
+        select: true,
+
+        layout: {
+            top1Start: 'pageLength',
+            top1End: 'search',
+            topStart: 'info',
+            topEnd: 'paging',
+            bottomStart: 'pageLength',
+            bottomEnd: 'search',
+            bottom2Start: 'info',
+            bottom2End: 'paging', 
+
+            top3Start: {
+                buttons: [{
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        {extend: 'copy',
+                            title: 'DEPARTMENTS',
+                            footer: false,
+                            exportOptions: {columns: ':visible',rows: ':visible'},
+                            },
+                            
+                        {extend: 'print',
+                            title: 'DEPARTMENTS',
+                            footer: false,
+                            autoPrint: false,
+                            exportOptions: {columns: ':visible',rows: ':visible'}
+                            }, 
+
+                        {extend: 'excel',
+                            title: 'DEPARTMENTS',
+                            footer: false,
+                            exportOptions: {columns: ':visible',rows: ':visible'},
+                            },   
+
+                        {extend: 'csv',
+                            title: 'DEPARTMENTS',
+                            footer: false,
+                            exportOptions: {columns: ':visible',rows: ':visible'},
+                            },
+
+                        {extend: 'pdf',
+                            title: 'DEPARTMENTS',
+                            footer: false,
+                            orientation: 'protrait',
+                            pageSize: 'LEGAL',
+                            exportOptions: {columns: ':visible',rows: ':visible'},
+                            },      
+                ]},
+
+                    {
+                    extend: 'collection',
+                    text: 'Export All Page',
+                    buttons: [
+                        {extend: 'copy',
+                            title: 'DEPARTMENTS',
+                            footer: false,
+                            exportOptions: {
+                                columns: ':visible',
+                                modifier: {
+                                    page: 'all',
+                                    search: 'none'   
+                                    },
+                                },
+                        },
+                            
+                        {extend: 'print',
+                            title: 'DEPARTMENTS',
+                            footer: false,
+                            autoPrint: false,
+                            exportOptions: {
+                                columns: ':visible',
+                                modifier: {
+                                    page: 'all',
+                                    search: 'none'   
+                                    },
+                                },
+                            }, 
+
+                        {extend: 'excel',
+                            title: 'DEPARTMENTS',
+                            footer: false,
+                            exportOptions: {
+                                columns: ':visible',
+                                modifier: {
+                                    page: 'all',
+                                    search: 'none'   
+                                    },
+                                },
+                            },   
+
+                        {extend: 'csv',
+                            title: 'DEPARTMENTS',
+                            footer: false,
+                            exportOptions: {
+                                columns: ':visible',
+                                modifier: {
+                                    page: 'all',
+                                    search: 'none'   
+                                    },
+                                },
+                            },
+
+                        {extend: 'pdf',
+                            title: 'DEPARTMENTS',
+                            footer: false,
+                            orientation: 'protrait',
+                            pageSize: 'LEGAL',
+                            exportOptions: {
+                                columns: ':visible',
+                                modifier: {
+                                    page: 'all',
+                                    search: 'none'   
+                                    },
+                                },
+                            },
+
+                    ]},
+                    'colvis'  // Column visibility button
+                ]
+            }
+        }, 
+        columnDefs: [
+            {
+                targets: -1,  // Hide the last column (Action buttons)
+                visible: false
+            }
+        ],
+        columnDefs: [
+                    {
+                        "targets": 3, // Target the first column (index 0)
+                        "orderable": false // Disable ordering for this column
+                    }
+                ],
+
+
+    //table fetch data
+        ajax: '/render_department_data',
+        columns: [
+            { data: 'department_name' },
+            { data: 'year' },
+            { data: 'section' },
+            {data: 'id',
+                render: function(data, type, row) {
+                    return `
+                        <button class="update-btn btn btn-warning btn-sm" 
+                            data-id="${data}" 
+                            data-department_name="${row.department_name}" 
+                            data-year="${row.year}" 
+                            data-section="${row.section}" 
+                            style="display:inline;">
+                            <i class="fa-solid fa-edit"></i>
+                        </button>
+                        <button class="delete-btn btn btn-danger btn-sm" 
+                            data-id="${data}" style="display:inline;">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    `;
+                }
+            },   
+        ]
+    });
+
+    // ADD department
+    $('#add_department_form').submit(function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            url: '/add_department',
+            data: $(this).serialize(),
+            success: function(response) {
+                if (response.success) {
+                    department_table.ajax.reload(null, false);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Department added successfully!',
+                        confirmButtonText: 'OK',
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                    $('#add_department_form')[0].reset();
+                } 
+                else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message,
+                        confirmButtonText: 'OK',
+                        timer: 1500,
+                        timerProgressBar: true
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred: ' + error,
+                    confirmButtonText: 'OK',
+                    timer: 1500,
+                    timerProgressBar: true
+                });
+            }
+        });
+    });
+
+    // DELETE EVENT
+    $('#department_table').on('click', '.delete-btn', function() {
+        var department_id = $(this).data('id');
+        console.log(department_id)
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'It will also delete students belong to this Department!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: 'DELETE',
+                    url: `/delete_department/${department_id}`,
+                    success: function(response) {
+                        if (response.success) {
+                            department_table.ajax.reload(null, false);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: response.message,
+                                confirmButtonText: 'OK',
+                                timer: 1500,
+                                timerProgressBar: true
+                            });
+                        } 
+                        else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message,
+                                confirmButtonText: 'OK',
+                                timer: 1500,
+                                timerProgressBar: true
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred: ' + error,
+                            confirmButtonText: 'OK',
+                            timer: 1500,
+                            timerProgressBar: true
+                        });
+                    }
+                });
+            }
+        });
+    }); 
+        // UPDATE department
+        // Open the update modal
+        $('#department_table').on('click', '.update-btn', function() {
+            var selected_department_id = $(this).data('id');
+            var update_department_name = $(this).data('department_name');
+            var update_department_year = $(this).data('year');
+            var update_department_section = $(this).data('section');
+
+            $('#selected_department_idT').val(selected_department_id);
+            $('#update_department_nameT').val(update_department_name);
+            $('#update_yearT').val(update_department_year);
+            $('#update_sectionT').val(update_department_section);
+
+            $('#update_department_modal').modal('show');
+        });
+        $('#update_department_form').submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'PUT',
+                url: '/update_department',
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        $('#update_department_modal').modal('hide');
+                        department_table.ajax.reload(null, false);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated!',
+                            text: response.message,
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                    } 
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred: ' + error,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                }
+            });
+        });
+
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,222 @@
+{% extends 'admin_base_top_nav.html' %}
+
+{% block title %}
+    MANAGE STUDENT ACCOUNT
+{% endblock %}
+
+{% block content %}
+<style>
+    .container {
+        max-width: 2560px;
+        max-height: 2260px; /* Limit container width for better layout */
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: auto;
+
+    }
+    table td {
+    max-width: 150px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+body {
+        background-color: hsl(134, 36%, 58%);
+    }
+</style>
+<div class="container mt-5">
+<h2 class="text-center fw-bold mb-4">🧑‍🎓 Manage Students Account</h2>
+    <div class="border p-3 bg-opacity-25 ">
+        <div class="row">
+            <!-- Add student Form (Smaller) -->
+            <div class="col-sm-12 col-md-3 col-lg-2 col-xl-2" >
+                <div class="border p-3">
+                
+                    <h1 class="fs-3 fw-bold fst-italic"> <i class="fa-solid fa-user-plus"></i> Add Student</h1>
+                    <form id="add_student_form" method="POST">
+                        <div class="mb-3">
+                            <label for="student_idT" class="form-label">Student ID</label>
+                            <input type="number" class="form-control" id="student_idT" name="student_idT" placeholder="GENERATE" min="100000" max="999999" maxlength="6" required>
+                        </div>
+                            <button type="button" class="btn btn-light" id="generate-btn">
+                                <i class="fa-solid fa-dice"></i>
+                            </button>
+                        <div class="mb-3">
+                            <label for="first_nameT" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="first_nameT" name="first_nameT" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="last_nameT" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="last_nameT" name="last_nameT" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="emailT" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="emailT" name="emailT" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="passwordT" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="passwordT" name="passwordT" required minlength="6" maxlength="20">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePasswordAdd">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Password must be between 6 and 20 characters.</small>
+                        </div>
+                        <div class="mb-3"
+                            <label for="departmentT" class="form-label">Select Department</label>
+                            <select id="departmentT" name="departmentT" class="form-select" required>
+                                <option value="" disabled selected>Choose ...</option>
+                                {% for department in departments %}
+                                    <option value="{{ department.id }}">
+                                    {{ department.department_name }}
+                                    {{ department.year }}
+                                    {{ department.section }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-plus"></i>Add Account
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- student Table (Larger) -->
+            <div class="col-sm-12 col-md-9 col-lg-10 col-xl-10 ">
+            <div class="border p-3">
+                <h1 class="fs-3 fw-bold fst-italic">Student Accounts:</h1>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="student_table" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th> 
+                                <th>Password</th>
+                                <th>Department /Year /Section</th>  
+                                <th>Date Registered</th>
+                                <th>Date Updated</th>
+                                
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            </div>
+
+            <br>
+        </div>
+    </div>
+</div>
+
+<!--update student account modal-->
+<div class="modal fade" id="update_student_account_modal" tabindex="-1" aria-labelledby="update_student_account_modal_label" >
+    <div class="modal-dialog" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="update_student_account_modal_label">Update Student Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="update_student_account_form">
+                        <input type="hidden" id="selected_student_account_idT" name="selected_student_account_idT">
+                        <div class="mb-3">
+                            <label for="update_student_idT" class="form-label">student ID</label>
+                            <input type="number" class="form-control" id="update_student_idT" name="update_student_idT" placeholder="GENERATE" min="100000" max="999999" maxlength="6" required>
+                        </div>
+                            <button type="button" class="btn btn-light" id="generate-btn">
+                                <i class="fa-solid fa-dice"></i>
+                            </button>
+                        <div class="mb-3">
+                            <label for="update_first_nameT" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="update_first_nameT" name="update_first_nameT" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="update_last_nameT" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="update_last_nameT" name="update_last_nameT" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="update_emailT" class="form-label">Email</label>
+                            <input type="text" class="form-control" id="update_emailT" name="update_emailT" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="update_passwordT" class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="update_passwordT" name="update_passwordT" minlength="6" maxlength="20" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePasswordUpdate">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Password must be between 6 and 20 characters.</small>
+                        </div>
+                        </div>
+                        <div class="mb-3"
+                            <label for="update_departmentT" class="form-label">Select Department</label>
+                            <select id="update_departmentT" name="update_departmentT" class="form-select" required>
+                                <option value="" disabled selected>Choose ...</option>
+                                {% for department in departments %}
+                                    <option value="{{ department.id }}">
+                                    {{ department.department_name }}
+                                    {{ department.year }}
+                                    {{ department.section }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='scripts/admin_manage_student_account/student_account_table.js') }}">
+</script>
+
+<script src="{{ url_for('static', filename='scripts/admin_manage_student_account/student_account_add.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_student_account/student_account_delete.js') }}">
+</script>
+<script src="{{ url_for('static', filename='scripts/admin_manage_student_account/student_account_update.js') }}">
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    $("#togglePasswordAdd").click(function () {
+        let passwordField = $("#passwordT");
+        let icon = $(this).find("i");
+
+        if (passwordField.attr("type") === "password") {
+            passwordField.attr("type", "text");
+            icon.removeClass("fa-eye").addClass("fa-eye-slash");
+        } else {
+            passwordField.attr("type", "password");
+            icon.removeClass("fa-eye-slash").addClass("fa-eye");
+        }
+    });
+
+    $("#togglePasswordUpdate").click(function () {
+        let passwordField = $("#update_passwordT");
+        let icon = $(this).find("i");
+
+        if (passwordField.attr("type") === "password") {
+            passwordField.attr("type", "text");
+            icon.removeClass("fa-eye").addClass("fa-eye-slash");
+        } else {
+            passwordField.attr("type", "password");
+            icon.removeClass("fa-eye-slash").addClass("fa-eye");
+        }
+    });
+});
+
+</script>
+{% endblock %}
