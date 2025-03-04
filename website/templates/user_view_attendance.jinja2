@@ -692,11 +692,18 @@ $(document).ready(function() {
 
 $(document).ready(function() {
     // Listen for clicks on tabs
-    $('#attended-tab').on('click', function(event) {
+    $('#fines-tab').on('click', function(event) {
         table.ajax.reload(null, false);
         unpaid_fines_table.ajax.reload(null,false);
+        paid_events_fines.ajax.reload(null,false)
+    });
+
+    $('#attended-tab').on('click', function(event) {
+        table.ajax.reload(null, false);
     });
 });
+
+
 
 </script>
 {% endblock %}

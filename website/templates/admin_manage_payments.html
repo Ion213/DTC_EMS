@@ -13,7 +13,7 @@
 </style>
 
 <div class="container-fluid">
-    <h2 class="text-center fw-bold mb-4">🎭 Manage Payments</h2>
+    <h2 class="text-center fw-bold mb-4"><i class="fa-solid fa-money-check-dollar"></i> Manage Payments</h2>
 
     <!-- Tabs for Navigation -->
     <ul class="nav nav-tabs" id="paymentTabs">
@@ -21,10 +21,7 @@
             <a class="nav-link active" data-bs-toggle="tab" href="#add-payment">Add Payment</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#paid-students">Paid Students per Event</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#unpaid-students">Unpaid Students per Event</a>
+            <a class="nav-link" data-bs-toggle="tab" href="#unpaid-students">Unpaid Students</a>
         </li>
     </ul>
 
@@ -72,7 +69,7 @@
                                         <div id="selectedEvents"></div>
                                     </div>
                                     <p id="totalFine" class="mt-2 text-danger">Total Fine: ₱0.00</p>
-                                    <input type="number" id="amount_pay" class="form-control mt-2" placeholder="Enter amount" required>
+                                    <input type="number" id="amount_pay" class="form-control mt-2" placeholder="Enter Cash Amount" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-100">Submit Payment</button>
                             </form>
@@ -96,7 +93,7 @@
                                             <th>Total Paid Fines</th>
                                             <th>Payment Cash Amount</th>
                                             <th>Payment Change</th>
-                                            <th>Balance</th>
+                                            <th>Remaining Balance</th>
                                             <th>Transaction Date</th>
                                             <th>Action</th>
                                         </tr>
@@ -129,49 +126,25 @@
             </div>
         </div>
 
-        <!-- Paid Students Tab -->
-        <div class="tab-pane fade" id="paid-students">
-            <div class="card border-success">
-                <div class="card-header bg-success text-white">Paid Students per Event</div>
+        <!-- Unpaid Students Tab -->
+        <div class="tab-pane fade" id="unpaid-students">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">Unpaid Students List</div>
                 <div class="card-body">
-                    <table class="table table-bordered table-striped">
+                    <table class="table table-bordered table-striped" id="unpaid_students_table">
                         <thead class="table-dark">
                             <tr>
                                 <th>Student Name</th>
-                                <th>Event</th>
-                                <th>Amount Paid</th>
-                                <th>Date Paid</th>
+                                <th>Department</th>
+                                <th>Balance</th>
                             </tr>
                         </thead>
-                        <tbody id="paid-students-list">
-                            <tr><td colspan="4" class="text-center text-muted">No records found.</td></tr>
-                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- Unpaid Students Tab -->
-        <div class="tab-pane fade" id="unpaid-students">
-            <div class="card border-danger">
-                <div class="card-header bg-danger text-white">Unpaid Students per Event</div>
-                <div class="card-body">
-                    <table class="table table-bordered table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Student Name</th>
-                                <th>Event</th>
-                                <th>Amount Due</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="unpaid-students-list">
-                            <tr><td colspan="4" class="text-center text-muted">No records found.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+
     </div>
 </div>
 
@@ -253,6 +226,7 @@
     var unpaid_fines_table;
     var unpaid_activities_table;
     var paid_events_fines;
+    var unpaid_students_table
     //search student and get it
     const user_list = $('#user-list');
 
@@ -909,7 +883,7 @@ $('#paid_events_fines').on('click', '.delete-btn', function() {
 
         let enteredAmount = parseFloat($('#amount_pay').val());
         if (isNaN(enteredAmount) || enteredAmount < totalFine) {
-            Swal.fire('Error', 'Entered amount should be equal to or greater than the total fine.', 'error');
+            Swal.fire('Error', 'Entered amount should be equal to or greater than the total fine.', 'Invalid Amount');
             return;
         }
 
@@ -962,6 +936,195 @@ $('#paid_events_fines').on('click', '.delete-btn', function() {
     });
 
 
-    
+
+
+
+
+
+
+    $(document).ready(function() {
+        unpaid_students_table = new DataTable('#unpaid_students_table', {
+           //table tools
+           responsive:true,
+           stateSave: true,
+           paging: true,
+           scrollCollapse: true,
+           scrollX: true,
+           scrollY: '50vh',
+           select: true,
+   
+           layout: {
+               top1Start: 'pageLength',
+               top1End: 'search',
+               topStart: 'info',
+               topEnd: 'paging',
+               bottomStart: 'pageLength',
+               bottomEnd: 'search',
+               bottom2Start: 'info',
+               bottom2End: 'paging', 
+   
+               top3Start: {
+                   buttons: [{
+                       extend: 'collection',
+                       text: 'Export',
+                       buttons: [
+                           {extend: 'copy',
+                               title: 'Unpaid Students',
+                               footer: false,
+                               exportOptions: {columns: ':visible',rows: ':visible'},
+                               },
+                               
+                           {extend: 'print',
+                               title: 'Unpaid Students',
+                               footer: false,
+                               autoPrint: false,
+                               exportOptions: {columns: ':visible',rows: ':visible'}
+                               }, 
+   
+                           {extend: 'excel',
+                               title: 'Unpaid Students',
+                               footer: false,
+                               exportOptions: {columns: ':visible',rows: ':visible'},
+                               },   
+   
+                           {extend: 'csv',
+                               title: 'Unpaid Students',
+                               footer: false,
+                               exportOptions: {columns: ':visible',rows: ':visible'},
+                               },
+   
+                           {extend: 'pdf',
+                               title: 'Unpaid Students',
+                               footer: false,
+                               orientation: 'protrait',
+                               pageSize: 'LEGAL',
+                               exportOptions: {columns: ':visible',rows: ':visible'},
+                               },      
+                   ]},
+   
+                       {
+                       extend: 'collection',
+                       text: 'Export All Page',
+                       buttons: [
+                           {extend: 'copy',
+                               title: 'Unpaid Students',
+                               footer: false,
+                               exportOptions: {
+                                   columns: ':visible',
+                                   modifier: {
+                                       page: 'all',
+                                       search: 'none'   
+                                       },
+                                   },
+                           },
+                               
+                           {extend: 'print',
+                               title: 'Unpaid Students',
+                               footer: false,
+                               autoPrint: false,
+                               exportOptions: {
+                                   columns: ':visible',
+                                   modifier: {
+                                       page: 'all',
+                                       search: 'none'   
+                                       },
+                                   },
+                               }, 
+   
+                           {extend: 'excel',
+                               title: 'Unpaid Students',
+                               footer: false,
+                               exportOptions: {
+                                   columns: ':visible',
+                                   modifier: {
+                                       page: 'all',
+                                       search: 'none'   
+                                       },
+                                   },
+                               },   
+   
+                           {extend: 'csv',
+                               title: 'Unpaid Students',
+                               footer: false,
+                               exportOptions: {
+                                   columns: ':visible',
+                                   modifier: {
+                                       page: 'all',
+                                       search: 'none'   
+                                       },
+                                   },
+                               },
+   
+                           {extend: 'pdf',
+                               title: 'Unpaid Students',
+                               footer: false,
+                               orientation: 'protrait',
+                               pageSize: 'LEGAL',
+                               exportOptions: {
+                                   columns: ':visible',
+                                   modifier: {
+                                       page: 'all',
+                                       search: 'none'   
+                                       },
+                                   },
+                               },
+   
+                       ]},
+                       'colvis'  // Column visibility button
+                   ]
+               }
+           }, 
+           columnDefs: [
+               {
+                   targets: -1,  // Hide the last column (Action buttons)
+                   visible: false
+               }
+           ],
+
+       //table fetch data
+           ajax: `/get_unpaid_student`,
+           columns: [
+               { data: 'student_name' },
+               { data: 'department' },
+               { data: 'balance' },
+           ]
+       });
+   
+     
+   });
+
+   $(document).ready(function() {
+    // Ensure correct tab is active on page load
+    var activeTab = localStorage.getItem('activeTab');
+
+    if (activeTab) {
+        $('#paymentTabs a[href="' + activeTab + '"]').tab('show');
+    } else {
+        $('#paymentTabs a:first').tab('show');
+    }
+
+    // Store active tab in localStorage
+    $('#paymentTabs a').on('shown.bs.tab', function(e) {
+        localStorage.setItem('activeTab', $(e.target).attr('href'));
+    });
+
+    // Reload table when "Unpaid Students" tab is clicked
+    $('#paymentTabs a[href="#unpaid-students"]').on('shown.bs.tab', function() {
+        unpaid_students_table.ajax.reload(null, false);
+    });
+
+        // Reload table when "Unpaid Students" tab is clicked
+    $('#paymentTabs a[href="#add-payment"]').on('shown.bs.tab', function() {
+        unpaid_fines_table.ajax.reload(null, false);
+        unpaid_activities_table.ajax.reload(null, false);
+        paid_events_fines.ajax.reload(null, false);
+
+    });
+
+
+
+});
+
+
 </script>
 {% endblock %}

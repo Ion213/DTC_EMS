@@ -467,8 +467,69 @@ def get_admin_transaction_events(transaction_id):
     except Exception as e:
         print("Error:", str(e))  # Log the error
         return jsonify({'success': False, 'message': 'Internal Server Error'}), 500
-
-
     
+
+
+#get unpaid students
+@admin_manage_payments.route('/get_unpaid_student/', methods=['GET'])
+@login_required
+@role_required_multiple('admin', 'ssg')
+def get_unpaid_student():
+    try:
+        students = User.query.filter_by(role='student').all()
+        unpaid_students = []
+
+        for s in students:
+            # Get IDs of activities the student attended
+            attended_activity_ids = db.session.query(Attendance.activity_id).filter(
+                Attendance.student_id == s.id,
+                Attendance.time_in.isnot(None),
+                Attendance.time_out.isnot(None)
+            ).subquery()
+
+            # Get IDs of activities where the student missed out (checked in but never checked out)
+            missed_out_activity_ids = db.session.query(Attendance.activity_id).filter(
+                Attendance.student_id == s.id,
+                Attendance.time_in.isnot(None),
+                Attendance.time_out.is_(None)
+            ).subquery()
+
+            # Get IDs of paid events
+            paid_events_ids = db.session.query(Payment.event_id).join(Transaction).filter(
+                Transaction.student_id == s.id
+            ).subquery()
+
+            # Fines for activities the student missed out on
+            missed_out_fines = db.session.query(func.sum(Sched_activities.fines)).filter(
+                Sched_activities.id.in_(missed_out_activity_ids),
+                Sched_activities.sched_id.notin_(paid_events_ids),
+                Sched_activities.end_time < datetime.now(manila_tz).replace(second=0, microsecond=0)
+            ).scalar() or 0  
+
+            # Fines for activities the student was absent from (not attended & not missed out)
+            absent_fines = db.session.query(func.sum(Sched_activities.fines)).filter(
+                Sched_activities.id.notin_(attended_activity_ids),  # Not attended
+                Sched_activities.id.notin_(missed_out_activity_ids),  # Not missed out
+                Sched_activities.sched_id.notin_(paid_events_ids),
+                Sched_activities.end_time < datetime.now(manila_tz).replace(second=0, microsecond=0)
+            ).scalar() or 0 
+
+            # Compute current balance (total fines - paid + missed out + absent)
+            current_balance = absent_fines + (missed_out_fines / 2)
+
+            if current_balance > 0:
+                unpaid_students.append({
+                    'id': s.id,
+                    'student_name': f'{s.first_name} {s.last_name}',
+                    'department': f'{s.department.department_name} {s.department.year} {s.department.section}',
+                    'balance': f'₱{current_balance}'
+                })
+
+
+        return jsonify({'success': True, 'data': unpaid_students})
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 
 
