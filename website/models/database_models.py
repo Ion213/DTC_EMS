@@ -106,6 +106,7 @@ class User(db.Model, UserMixin):
     date_registered = db.Column(db.DateTime, nullable=True)
     date_updated = db.Column(db.DateTime, nullable=True)
     role = db.Column(db.String(50), nullable=False, default='student')  # 'student' or 'admin'
+    is_verified = db.Column(db.Boolean, default=False)  # New field for email verification
     department_id = db.Column(db.Integer, db.ForeignKey('department.id'), nullable=True)  # Only for students
     attendances = db.relationship('Attendance', backref='user', lazy=True, cascade="all, delete-orphan") # Only for students
     transaction = db.relationship('Transaction', backref='user', lazy=True, cascade="all, delete-orphan")  # Track student payments

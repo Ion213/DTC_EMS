@@ -94,7 +94,8 @@ def add_ssg_account():
             email=emailV,
             password=passwordV,
             role=role,
-            date_registered=datetime.now(manila_tz).replace(second=0,microsecond=0)
+            date_registered=datetime.now(manila_tz).replace(second=0,microsecond=0),
+            is_verified=True
             )
         db.session.add(ssgAdd)
         db.session.commit()
@@ -157,6 +158,7 @@ def update_ssg_account():
         ssgUp.email=update_emailV
         ssgUp.password=update_passwordV
         ssgUp.date_updated=datetime.now(manila_tz).replace(microsecond=0,second=0)
+        ssgUp.is_verified=True
         db.session.commit()
         return jsonify({'success': True, 'message': 'SSG account updated successfully'})
     except Exception as e:

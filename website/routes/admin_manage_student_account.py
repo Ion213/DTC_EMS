@@ -146,7 +146,8 @@ def add_student_account():
             email=emailV,
             password=passwordV,
             date_registered=datetime.now(manila_tz).replace(second=0,microsecond=0),
-            department_id=selected_department_idV
+            department_id=selected_department_idV,
+            is_verified=True
             )
         db.session.add(studentAdd)
         db.session.commit()
@@ -239,6 +240,7 @@ def update_student_account():
         studentUp.password=update_passwordV
         studentUp.department_id=update_departmentV
         studentUp.date_updated=datetime.now(manila_tz).replace(microsecond=0,second=0)
+        studentUp.is_verified=True
         db.session.commit()
         return jsonify({'success': True, 'message': 'Student account updated successfully'})
     except Exception as e:

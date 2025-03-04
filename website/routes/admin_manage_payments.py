@@ -97,11 +97,13 @@ def get_student_balance(student_id):
     try:
         if student_id is None:
             return jsonify({'success': False, 'message': 'Please provide a valid student ID.'}), 400
+        
         # Get IDs of activities the student attended
         attended_activity_ids = db.session.query(Attendance.activity_id).filter(
             Attendance.student_id == student_id,
             Attendance.time_in.isnot(None),
-            Attendance.time_out.isnot(None)
+            Attendance.time_out.isnot(None),
+
         ).subquery()
 
         # Get IDs of activities where the student missed out (checked in but never checked out)
@@ -125,7 +127,7 @@ def get_student_balance(student_id):
 
             Sched_activities.sched_id.notin_(paid_events_ids), 
 
-            Sched_activities.end_time < datetime.now(manila_tz).replace(second=0, microsecond=0)
+            Sched_activities.end_time < datetime.now(manila_tz).replace(second=0, microsecond=0),
         ).scalar() or 0  
 
         # Fines for activities the student was absent from (not attended & not missed out)

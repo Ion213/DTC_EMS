@@ -6,9 +6,17 @@ import os
 from datetime import timedelta
 
 
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
+
 #create database object
 db=SQLAlchemy()
 DB_NAME ="database.db"
+
+mail = Mail()
+
+dtc_email='tmux8280@gmail.com'
+dtc_password='xgbw ftxh nwit jsuz'
 
 #create migration so that you can migrate youre models(using cmd)
 migrate = Migrate()
@@ -20,8 +28,21 @@ def flask_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
     app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=7)
     #inheret the database and mirgration to the main app(flask app)
+
+    # Email Configuration
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+    app.config['MAIL_PORT'] = 465  # Use 465 for SSL
+    app.config['MAIL_USE_SSL'] = True  # Enable SSL
+    app.config['MAIL_USE_TLS'] = False  # Disable TLS
+    app.config['MAIL_USERNAME'] = dtc_email  
+    app.config['MAIL_PASSWORD'] = dtc_password  # Use App Password
+
+
+
     db.init_app(app)
     migrate.init_app(app, db)
+
+    mail.init_app(app)  # Initialize Flask-Mail
     
     #implement login manager(sessions)
     # LoginManager initialization
