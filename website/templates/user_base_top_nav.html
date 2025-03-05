@@ -42,18 +42,77 @@
     <script src="{{ url_for('static', filename='qr_code_generator/qrcode.min.js') }}">
     </script>
 
+
+    <!-- Custom CSS for Modern RGB Green Design -->
     <style>
-        .navbar-brand img {
-            height: 40px;
-            border-radius: 50%;
-        }
-        .navbar-nav .nav-item .nav-link {
-            font-size: 16px;
-        }
-        .dropdown-menu {
-            min-width: 180px;
-        }
-    </style>
+    body {
+      background: linear-gradient(135deg, #000, #0a0a0a);
+      color: #e19111;
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      background: linear-gradient(135deg, #00ff00, #00cc00);
+      animation: rgbAnimation 5s infinite alternate;
+    }
+
+    @keyframes rgbAnimation {
+      0% { background: linear-gradient(135deg, #3bb7a248, #144f4599); }
+      50% { background: linear-gradient(135deg, #44857a, #16815f5a); }
+      100% { background: linear-gradient(135deg, #0f30397b, #0542387d); }
+    }
+
+
+    .navbar-brand img {
+      filter: drop-shadow(0 0 5px #00ff00);
+    }
+
+    .nav-link, .dropdown-item {
+      color: hwb(189 2% 29%) !important;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover, .dropdown-item:hover {
+      color: #00ff006b !important;
+      transform: scale(1.1);
+    }
+
+    .dropdown-menu {
+      background: linear-gradient(135deg, #074e07b8, #0b6f40);
+      border: 1px solid #084e47f9;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(14, 70, 14, 0.42);
+    }
+
+    #content {
+      padding: 20px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00ff00, #00cc00);
+      border: none;
+      animation: rgbAnimation 5s infinite alternate;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #00cc00, #009900);
+    }
+
+    .table {
+      color: #fff;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: rgba(0, 255, 0, 0.1);
+    }
+
+    .table-hover tbody tr:hover {
+      background-color: rgba(0, 255, 0, 0.2);
+    }
+  </style>
 </head>
 <body>
     <!-- Navbar -->

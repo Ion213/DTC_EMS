@@ -7,9 +7,158 @@
 {% block content %}
 
 <style>
-    .container { max-width: 2560px; max-height: 3660px; } 
-    table { font-family: 'Helvetica', sans-serif; font-size: 12px; } 
-    body { background-color: hsl(134, 36%, 58%); }
+    /* Modern RGB Background Animation */
+    body {
+        background: linear-gradient(135deg, #063406, #0a4a0a, #083408, #006600);
+        background-size: 400% 400%;
+        animation: rgbBackground 10s ease infinite;
+        color: #fff;
+        font-family: 'Helvetica', sans-serif;
+    }
+
+    /*@keyframes rgbBackground {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }*/
+
+    .container {
+        max-width: 2560px;
+        max-height: 3660px;
+        padding: 1px;
+    }
+
+    h2 {
+        color: #fff;
+        text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+    }
+
+    .border {
+        border: 1px solid rgba(0, 255, 0, 0.3) !important;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(10px);
+    }
+
+    .table {
+        color: hsl(0, 7%, 3%);
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 255, 0, 0.1);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 255, 0, 0.2);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #00ff00, #00cc00);
+        border: none;
+        animation: rgbAnimation 5s infinite alternate;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #00cc00, #009900);
+    }
+
+    @keyframes rgbAnimation {
+        0% { background: linear-gradient(135deg, #00ff00, #00cc00); }
+        50% { background: linear-gradient(135deg, #00cc00, #009900); }
+        100% { background: linear-gradient(135deg, #009900, #00ff00); }
+    }
+
+    .form-control {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(0, 255, 0, 0.3);
+        color: #fff;
+    }
+
+    .form-control:focus {
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid #00ff00;
+        box-shadow: 0 0 10px #00ff00;
+    }
+
+    .modal-content {
+        background: rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(0, 255, 0, 0.3);
+        color: #fff;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid rgba(0, 255, 0, 0.3);
+    }
+
+    .modal-footer {
+        border-top: 1px solid rgba(0, 255, 0, 0.3);
+    }
+
+
+
+	/* DataTables Custom Styling for Dark Theme */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: #fff !important;
+    border: 1px solid rgba(0, 255, 0, 0.3) !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: rgba(0, 255, 0, 0.2) !important;
+    color: #00ff00 !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: rgba(0, 255, 0, 0.5) !important;
+    color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing,
+.dataTables_wrapper .dataTables_paginate {
+    color: #fff !important;
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 255, 0, 0.3);
+    color: #fff;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #00ff00;
+    box-shadow: 0 0 10px #00ff00;
+}
+
+/* Styling for Buttons and Dropdowns */
+.dt-buttons .btn {
+    background: linear-gradient(135deg, #00ff00, #00cc00) !important;
+    border: none !important;
+    color: #fff !important;
+}
+
+.dt-buttons .btn:hover {
+    background: linear-gradient(135deg, #00cc00, #009900) !important;
+}
+
+.dt-button-collection {
+    background: rgba(0, 0, 0, 0.9) !important;
+    border: 1px solid rgba(0, 255, 0, 0.3) !important;
+}
+
+.dt-button-collection button {
+    color: #fff !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    border: none !important;
+}
+
+.dt-button-collection button:hover {
+    background: rgba(0, 255, 0, 0.2) !important;
+    color: #00ff00 !important;
+}
 </style>
 
 <div class="container-fluid">

@@ -6,47 +6,37 @@
 
 {% block content %}
 <style>
-    body {
-        background-color: hsl(134, 36%, 58%);
+/* Modern RGB Background Animation */
+body {
+        background: linear-gradient(135deg, #063406, #0a4a0a, #083408, #006600);
+        background-size: 400% 400%;
+        animation: rgbBackground 10s ease infinite;
+        color: #fff;
+        font-family: 'Helvetica', sans-serif;
     }
 
+    /*@keyframes rgbBackground {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }*/
+
     .container {
-        max-width: 1200px;
-        margin: 0 auto;
+        max-width: 2560px;
+        max-height: 3660px;
         padding: 20px;
     }
 
     h2 {
-        color: #2c3e50;
-        font-weight: 700;
-        text-align: center;
-        margin-bottom: 30px;
-        font-size: 2.5rem;
+        color: #fff;
+        text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
     }
 
-    .nav-tabs {
-        border-bottom: 2px solid #3498db;
-        margin-bottom: 20px;
-    }
-
-    .nav-link {
-        color: #2c3e50;
-        font-weight: 600;
-        border: none;
-        border-radius: 0;
-        padding: 10px 20px;
-        transition: all 0.3s ease;
-    }
-
-    .nav-link:hover {
-        background-color: #3498db;
-        color: white;
-    }
-
-    .nav-link.active {
-        background-color: #3498db;
-        color: white;
-        border: none;
+    .border {
+        border: 1px solid rgba(0, 255, 0, 0.3) !important;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(10px);
     }
 
     .card {

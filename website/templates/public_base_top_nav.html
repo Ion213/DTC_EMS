@@ -15,6 +15,76 @@
     <script src="{{ url_for('static', filename='bootstrap5.3/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ url_for('static', filename='jquery3.7.1/jquery-3.7.1.min.js') }}"></script>
 
+ <!-- Custom CSS for Modern RGB Green Design -->
+ <style>
+    body {
+      background: linear-gradient(135deg, #000, #0a0a0a);
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      background: linear-gradient(135deg, #00ff00, #00cc00);
+      animation: rgbAnimation 5s infinite alternate;
+    }
+
+    @keyframes rgbAnimation {
+      0% { background: linear-gradient(135deg, #3bb7a2, #144f45); }
+      50% { background: linear-gradient(135deg, #44857a, #16815f); }
+      100% { background: linear-gradient(135deg, #0f3039, #054238b8); }
+    }
+
+    .navbar-brand img {
+      filter: drop-shadow(0 0 5px #00ff00);
+    }
+
+    .nav-link, .dropdown-item {
+      color: #fff !important;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover, .dropdown-item:hover {
+      color: #00ff00 !important;
+      transform: scale(1.1);
+    }
+
+    .dropdown-menu {
+      background: linear-gradient(135deg, #00cc00, #009900);
+      border: 1px solid #00ff00;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(0, 255, 0, 0.1);
+    }
+
+    #content {
+      padding: 20px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00ff00, #00cc00);
+      border: none;
+      animation: rgbAnimation 5s infinite alternate;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #00cc00, #009900);
+    }
+
+    .table {
+      color: #fff;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: rgba(0, 255, 0, 0.1);
+    }
+
+    .table-hover tbody tr:hover {
+      background-color: rgba(0, 255, 0, 0.2);
+    }
+  </style>
+
 </head>
 
 <body>
@@ -54,13 +124,6 @@
 
     {% endblock %}
 
-
-    <style>
-        #pub_nav.navbar {
-            background-color: #a81b51 !important;
-        }
-        
-        </style>
 
 </body>
 

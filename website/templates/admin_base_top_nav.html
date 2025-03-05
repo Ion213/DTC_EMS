@@ -42,75 +42,147 @@
 
   <script src="{{ url_for('static', filename='html5-qrcode-scanner/html5-qrcode.min.js') }}">
   </script>
+
+
+    <!-- Custom CSS for Modern RGB Green Design -->
+    <style>
+    body {
+      background: linear-gradient(135deg, #000, #0a0a0a);
+      color: #fff;
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .navbar {
+      background: linear-gradient(135deg, #00ff00, #00cc00);
+      animation: rgbAnimation 5s infinite alternate;
+    }
+
+    @keyframes rgbAnimation {
+      0% { background: linear-gradient(135deg, #3bb7a248, #144f4599); }
+      50% { background: linear-gradient(135deg, #44857a, #16815f5a); }
+      100% { background: linear-gradient(135deg, #0f30397b, #0542387d); }
+    }
+
+
+    .navbar-brand img {
+      filter: drop-shadow(0 0 5px #00ff00);
+    }
+
+    .nav-link, .dropdown-item {
+      color: #fff !important;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover, .dropdown-item:hover {
+      color: #00ff00 !important;
+      transform: scale(1.1);
+    }
+
+    .dropdown-menu {
+      background: linear-gradient(135deg, #00cc00, #009900);
+      border: 1px solid #00ff00;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(0, 255, 0, 0.1);
+    }
+
+    #content {
+      padding: 20px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00ff00, #00cc00);
+      border: none;
+      animation: rgbAnimation 5s infinite alternate;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #00cc00, #009900);
+    }
+
+    .table {
+      color: #fff;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+      background-color: rgba(0, 255, 0, 0.1);
+    }
+
+    .table-hover tbody tr:hover {
+      background-color: rgba(0, 255, 0, 0.2);
+    }
+  </style>
 </head>
 <body>
-<div id="content">
+  <div id="content">
 
-  <nav class="navbar navbar-expand-lg navbar-light border-dark text-white py-2" style="background-color:#b7c6bf">
-    <div class="container-fluid ">
-      <a class="navbar-brand" href="#">
-                <img src="{{ url_for('static', filename='logo/dtc.png') }}" alt="Logo" width="50" height="50">
-                DTC EMS
-      </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-            {% if current_user.role == 'admin' or current_user.role == 'ssg'%}
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                    data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-calendar-days"></i> EVENTS</a>
-                    
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_event.manage_event_render_template') }}"><i class="fa-solid fa-calendar-plus"></i> MANAGE EVENT</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_schedule.manage_schedule_render_template') }}"><i class="fa-solid fa-calendar-check"></i> MANAGE EVENT SCHEDULE</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_attendance.manage_attendance_render_template') }}"><i class="fa-solid fa-clipboard-user"></i> MANAGE EVENT ATTENDANCES</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_payments.payments_page') }}"><i class="fa-solid fa-money-check-dollar"></i> MANAGE EVENT PAYMENTS</a></li>
-                </ul>
-            </li>
-            {%endif%}
-            {% if current_user.role == 'admin' %}
+<nav class="navbar navbar-expand-lg navbar-light border-dark text-white py-2">
+  <div class="container-fluid ">
+    <a class="navbar-brand" href="#">
+              <img src="{{ url_for('static', filename='logo/dtc.png') }}" alt="Logo" width="50" height="50">
+              DTC EMS
+    </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+          {% if current_user.role == 'admin' or current_user.role == 'ssg'%}
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                    data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-users-gear"></i> USER ACCOUNTS</a>
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                  data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-calendar-days"></i> EVENTS</a>
                   
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_ssg_account.manage_ssg_account_render_template') }}"><i class="fa-solid fa-user-tie"></i> MANAGE SSG ACCOUNT</a></li>
-                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_student_account.manage_student_account_render_template') }}"><i class="fa-solid fa-user"></i> MANAGE STUDENT ACCOUNT</a></li>
-                </ul>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                    data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-building"></i> DEPARTMENTS</a>
-                  
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <li><a class="dropdown-item" href="{{ url_for('admin_manage_department.manage_department_render_template') }}"><i class="fa-solid fa-building-user"></i> MANAGE DEPARTMENTS</a></li>
-                </ul>
-            </li>
-            {%endif%}
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="{{ url_for('admin_manage_event.manage_event_render_template') }}"><i class="fa-solid fa-calendar-plus"></i> MANAGE EVENT</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('admin_manage_schedule.manage_schedule_render_template') }}"><i class="fa-solid fa-calendar-check"></i> MANAGE EVENT SCHEDULE</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('admin_manage_attendance.manage_attendance_render_template') }}"><i class="fa-solid fa-clipboard-user"></i> MANAGE EVENT ATTENDANCES</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('admin_manage_payments.payments_page') }}"><i class="fa-solid fa-money-check-dollar"></i> MANAGE EVENT PAYMENTS</a></li>
+              </ul>
+          </li>
+          {%endif%}
+          {% if current_user.role == 'admin' %}
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                  data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-users-gear"></i> USER ACCOUNTS</a>
+                
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="{{ url_for('admin_manage_ssg_account.manage_ssg_account_render_template') }}"><i class="fa-solid fa-user-tie"></i> MANAGE SSG ACCOUNT</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('admin_manage_student_account.manage_student_account_render_template') }}"><i class="fa-solid fa-user"></i> MANAGE STUDENT ACCOUNT</a></li>
+              </ul>
+          </li>
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                  data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-building"></i> DEPARTMENTS</a>
+                
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="{{ url_for('admin_manage_department.manage_department_render_template') }}"><i class="fa-solid fa-building-user"></i> MANAGE DEPARTMENTS</a></li>
+              </ul>
+          </li>
+          {%endif%}
 
-            <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle"></i> {{ current_user.email }}
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                          <li class="nav-item">
-                            <a class="nav-link" href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> LOG_OUT</a>
-                          </li>
-                        </ul>
-                    </li>
+          <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                          <i class="fas fa-user-circle"></i> {{ current_user.email }}
+                      </a>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        <li class="nav-item">
+                          <a class="nav-link" href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> LOG_OUT</a>
+                        </li>
+                      </ul>
+                  </li>
 
-              
-            </ul>
-        </div>
-    </div>
+            
+          </ul>
+      </div>
+  </div>
 </nav>
 
 
-    {% block content %}
-    {% endblock %}
+  {% block content %}
+  {% endblock %}
 
 </div>
 
