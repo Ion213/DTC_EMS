@@ -71,14 +71,14 @@ class Transaction(db.Model):
 
     # Relationship with Payment
     payments = db.relationship(
-        'Payment', backref='transaction', cascade="all, delete-orphan", passive_deletes=True
+        'Payment', backref='transaction', cascade="all, delete-orphan", lazy=True
     )
 
 
 class Payment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey('schedule.id'), nullable=False)
-    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id', ondelete="CASCADE"), nullable=False)
+    transaction_id = db.Column(db.Integer, db.ForeignKey('transaction.id'), nullable=False)
     date_paid = db.Column(db.DateTime, nullable=True)
 
 

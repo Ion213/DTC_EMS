@@ -69,7 +69,8 @@ def user_render_attendance_page():
 
             Sched_activities.sched_id.notin_(paid_events_ids), 
 
-            Sched_activities.end_time < datetime.now(manila_tz).replace(second=0, microsecond=0)
+            Sched_activities.end_time < datetime.now(manila_tz).replace(second=0, microsecond=0),
+            Sched_activities.end_time > current_user.date_registered
         ).scalar() or 0  
 
         # Fines for activities the student was absent from (not attended & not missed out)
@@ -79,7 +80,8 @@ def user_render_attendance_page():
 
             Sched_activities.sched_id.notin_(paid_events_ids), 
             
-            Sched_activities.end_time < datetime.now(manila_tz).replace(second=0, microsecond=0)
+            Sched_activities.end_time < datetime.now(manila_tz).replace(second=0, microsecond=0),
+            Sched_activities.end_time > current_user.date_registered
         ).scalar() or 0 
 
         # Compute current balance (total fines - paid + missed out + absent)
@@ -137,11 +139,11 @@ def get_student_unpaid_event_fines():
         ).subquery()
 
         # Query unpaid event fines (without filtering by `end_time` here)
-        unpaid_event_fines = Schedule.query.filter(
+        unpaid_event_fines = db.session.query(Schedule).join(Sched_activities).filter(
             ~Schedule.id.in_(paid_events_ids),  # Events not paid for
-            Schedule.scheduled_activities.any(
-                ~Sched_activities.id.in_(attended_ids)  # Activities not attended
-            )
+            ~Sched_activities.id.in_(attended_ids),  # Activities not attended
+            Sched_activities.end_time <=datetime.now(manila_tz).replace(second=0,microsecond=0),
+            Sched_activities.end_time >current_user.date_registered
         ).all()
 
         unpaid_events = []
@@ -181,7 +183,8 @@ def get_attended_data():
         current_time = datetime.now(manila_tz).replace(second=0, microsecond=0)
 
         all_activities = Sched_activities.query.filter(
-            Sched_activities.end_time < current_time
+            Sched_activities.end_time < current_time,
+            Sched_activities.end_time > current_user.date_registered
         ).all()
 
         all_attendance = []

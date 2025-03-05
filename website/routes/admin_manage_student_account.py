@@ -58,7 +58,7 @@ def manage_student_account_render_template():
 def render_student_account_data():
     try:
 
-        student=User.query.filter_by(role='student').all()
+        student=User.query.filter_by(role='student',is_verified=True).all()
         all_students = []
         
         for st in student:
@@ -246,4 +246,89 @@ def update_student_account():
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)})
+    
 
+#------------------------------------------
+
+#get unverified students
+@admin_manage_student_account.route('/get_unverified_students', methods=['GET'])
+@login_required
+@role_required('admin')
+def get_unverified_students():
+    try:
+
+        student=User.query.filter_by(role='student',is_verified=False).all()
+        all_students = []
+        
+        for st in student:
+            dep=Department.query.get(st.department_id)
+            students_data = {
+                'id': st.id,
+                'student_ID':st.student_ID,
+                'first_name':st.first_name,
+                'last_name':st.last_name,
+                'email':st.email,
+                'password':st.password,
+                'date_registered':st.date_registered.strftime('%Y-%B-%d-%A %I:%M %p') if st.date_registered else None,
+                'date_updated':st.date_updated.strftime('%Y-%B-%d-%A %I:%M %p') if st.date_updated else None,
+
+                'dep_id':dep.id,
+                'department':dep.department_name,
+                'year':dep.year,
+                'section':dep.section,
+
+            }
+            
+            all_students.append(students_data)
+        return jsonify({'data': all_students})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+    
+
+
+#decline account
+@admin_manage_student_account.route('/decline_student_account/<int:student_id>', methods=['DELETE'])
+@login_required
+@role_required('admin')
+def decline_student_account(student_id):
+    try:
+
+        # Fetch the event by ID and delete it
+        studentDel = User.query.get(student_id)
+        if not studentDel:
+            return jsonify({'success': False, 'message': 'Student not found'})
+        # Delete attendance records associated with the student (fixing the relationship issue)
+        Attendance.query.filter(Attendance.user.has(id=student_id)).delete()
+        db.session.delete(studentDel)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Student Account removed successfully'})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)})
+
+
+#accept account
+@admin_manage_student_account.route('/verify_student_account/<int:student_id>', methods=['PUT'])
+@login_required
+@role_required('admin')
+def verify_student_account(student_id):
+    try:
+
+        if not student_id:
+            return jsonify({'success': False, 'message': 'Student not Found'})
+        
+
+        studentAccept = User.query.get(student_id)
+
+        if not studentAccept:
+            return jsonify({'success': False, 'message': 'Student not found'})
+        
+
+        studentAccept.is_verified=True
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Student Account Verified successfully'})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)})

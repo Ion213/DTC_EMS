@@ -1,4 +1,4 @@
-var student_acount_table
+var student_uverified_table
 $(document).ready(function () {
 
         $('#generate-btn').click(function () {
@@ -14,21 +14,7 @@ $(document).ready(function () {
         });
     });
 
-    $('#update_student_account_modal').on('click', '#generate-btn', function() {
-            $.ajax({
-                url: '/generate_student_id',
-                method: 'GET',
-            success: function (data) {
-                    $('#update_student_idT').val(data.random_id); // Set the generated ID in the input field
-            },
-            error: function () {
-                    alert('Failed to generate Access ID. Please try again.');
-            }
-        });
-    });
-
-
-    student_acount_table = new DataTable('#student_table', {
+    student_uverified_table = new DataTable('#student_uverified_table', {
         //table tools
         responsive:true,
         stateSave: true,
@@ -54,32 +40,32 @@ $(document).ready(function () {
                     text: 'Export',
                     buttons: [
                         {extend: 'copy',
-                            title: 'STUDENTS ACCOUNT',
+                            title: 'UNVERIFIED STUDENTS ACCOUNT',
                             footer: false,
                             exportOptions: {columns: ':visible',rows: ':visible'},
                             },
                             
                         {extend: 'print',
-                            title: 'STUDENTS ACCOUNT',
+                            title: 'UNVERIFIED STUDENTS ACCOUNT',
                             footer: false,
                             autoPrint: false,
                             exportOptions: {columns: ':visible',rows: ':visible'}
                             }, 
 
                         {extend: 'excel',
-                            title: 'STUDENTS ACCOUNT',
+                            title: 'UNVERIFIED STUDENTS ACCOUNT',
                             footer: false,
                             exportOptions: {columns: ':visible',rows: ':visible'},
                             },   
 
                         {extend: 'csv',
-                            title: 'STUDENTS ACCOUNT',
+                            title: 'UNVERIFIED STUDENTS ACCOUNT',
                             footer: false,
                             exportOptions: {columns: ':visible',rows: ':visible'},
                             },
 
                         {extend: 'pdf',
-                            title: 'STUDENTS ACCOUNT',
+                            title: 'UNVERIFIED STUDENTS ACCOUNT',
                             footer: false,
                             orientation: 'protrait',
                             pageSize: 'LEGAL',
@@ -92,7 +78,7 @@ $(document).ready(function () {
                     text: 'Export All Page',
                     buttons: [
                         {extend: 'copy',
-                            title: 'STUDENTS ACCOUNT',
+                            title: 'UNVERIFIED STUDENTS ACCOUNT',
                             footer: false,
                             exportOptions: {
                                 columns: ':visible',
@@ -104,7 +90,7 @@ $(document).ready(function () {
                         },
                             
                         {extend: 'print',
-                            title: 'STUDENTS ACCOUNT',
+                            title: 'UNVERIFIED STUDENTS ACCOUNT',
                             footer: false,
                             autoPrint: false,
                             exportOptions: {
@@ -117,7 +103,7 @@ $(document).ready(function () {
                             }, 
 
                         {extend: 'excel',
-                            title: 'STUDENTS ACCOUNT',
+                            title: 'UNVERIFIED STUDENTS ACCOUNT',
                             footer: false,
                             exportOptions: {
                                 columns: ':visible',
@@ -129,7 +115,7 @@ $(document).ready(function () {
                             },   
 
                         {extend: 'csv',
-                            title: 'STUDENTS ACCOUNT',
+                            title: 'UNVERIFIED STUDENTS ACCOUNT',
                             footer: false,
                             exportOptions: {
                                 columns: ':visible',
@@ -141,7 +127,7 @@ $(document).ready(function () {
                             },
 
                         {extend: 'pdf',
-                            title: 'STUDENTS ACCOUNT',
+                            title: 'UNVERIFIED STUDENTS ACCOUNT',
                             footer: false,
                             orientation: 'protrait',
                             pageSize: 'LEGAL',
@@ -173,7 +159,7 @@ $(document).ready(function () {
                 ],
 
     //table fetch data
-        ajax: `/render_student_account_data`,
+        ajax: `/get_unverified_students`,
         columns: [
             { data: 'student_ID' },
             { data: 'first_name' },
@@ -203,18 +189,12 @@ $(document).ready(function () {
             {data: 'id',
                 render: function(data, type, row) {
                     return `
-                        <button class="update-btn btn btn-warning btn-sm" 
-                            data-id="${data}"
-                            data-student_id="${row.student_ID}"
-                            data-first_name="${row.first_name}" 
-                            data-last_name="${row.last_name}"
-                            data-email="${row.email}"
-                            data-password="${row.password}"
-                            data-dep_id="${row.dep_id}" 
-                            style="display:inline;">
-                            <i class="fa-solid fa-edit"></i>
+                        <button class="verify-btn btn btn-success btn-sm"
+                            data-id="${data}" style="display:inline;">
+                            <i class="fa-regular fa-circle-check"></i>
                         </button>
-                        <button class="delete-btn btn btn-danger btn-sm" 
+
+                        <button class="decline-btn btn btn-danger btn-sm" 
                             data-id="${data}" style="display:inline;">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
@@ -224,9 +204,9 @@ $(document).ready(function () {
         ]
     });
 
-    $('#add_students_tab').on('click', function(event) {
-        student_acount_table.ajax.reload(null, false);
 
+    $('#unverified_students_tab').on('click', function(event) {
+        student_uverified_table.ajax.reload(null, false);
     });
 
 });
